@@ -1,0 +1,197 @@
+/* Main Login Page Container */
+.login-container {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: linear-gradient(135deg, #3c0039, #72057a, #360033);
+}
+
+/* Image container (Left Side) - Shifted Left */
+.image-container {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 0 40px;
+  text-align: center;
+  transform: translateX(-10%); /* Moves the image and text slightly left */
+}
+
+/* App Title - Shifted Left */
+.app-title {
+  font-size: 36px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 18px;
+  transform: translateX(-5%); /* Slight shift left */
+}
+
+/* App Subtitle - Shifted Left */
+.app-subtitle {
+  font-size: 16px;
+  color: #e0e0e0;
+  margin-bottom: 60px;
+  transform: translateX(-5%); /* Slight shift left */
+}
+
+
+.login-image {
+  max-width: 55%;
+  height: auto;
+}
+
+/* Login Content (Reduced Sizes) */
+.login-content {
+  background-color: white;
+  border-radius: 15px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 75%;
+  width: 25%;
+  box-shadow: 0px 0px 30px 8px rgba(241, 167, 244, 0.3); /* Slightly reduced glow */
+  padding: 30px;
+  transition: box-shadow 0.3s ease;
+}
+
+.login-content:hover {
+  box-shadow: 0px 0px 50px 12px rgba(241, 167, 244, 0.7); /* Softer glow */
+}
+
+/* Welcome Text */
+.welcome-text {
+  font-size: 24px; /* Decreased from 30px */
+  font-weight: bold;
+  color: #460343;
+  margin-bottom: 40px;
+}
+
+/* Form Input Styles */
+.input-group {
+  width: 100%;
+  margin-bottom: 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.input-label {
+  font-size: 16px; /* Decreased from 18px */
+  font-weight: bold;
+  color: #460343;
+  margin-bottom: 6px;
+  width: 150%; /* Reduced width */
+}
+
+/* Input Fields (Smaller) */
+.input-field {
+  width: 150%; /* Decreased width */
+  padding: 12px; /* Reduced padding */
+  font-size: 12px; /* Decreased text size */
+  border-radius: 10px;
+  border: 2px solid #620162;
+  box-sizing: border-box;
+  background-color: #f9f9f9;
+  transition: 0.3s;
+  text-align: center;
+}
+
+.input-field:focus {
+  border: 2px solid #06c64c;
+  background-color: #fff;
+}
+
+/* Submit Button (Smaller) */
+.submit-btn {
+  width: 75%;
+  padding: 14px;
+  font-size: 18px; /* Decreased from 20px */
+  background-color: #460343;
+  border: none;
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  margin-top: 15px;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #034c15;
+}
+
+/* Google Login Button (Smaller) */
+.google-btn {
+  width: 110%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  font-size: 16px; /* Reduced from 18px */
+  font-weight: bold;
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 50px; /* Reduced space */
+  transform: translateX(-8%);
+}
+
+.google-btn:hover {
+  background-color: #024f14;
+  color: rgb(247, 247, 253);
+}
+
+.google-icon {
+  margin-right: 12px;
+}
+
+/* Error Message */
+.error-message {
+  color: #f44336;
+  font-size: 14px; /* Reduced from 16px */
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+/* Mobile Responsiveness (Updated for smaller sizes) */
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+  }
+
+  .image-container {
+    width: 100%;
+    padding: 0;
+    margin-bottom: 20px;
+  }
+
+  .login-content {
+    width: 85%;
+    padding: 25px;
+    height: auto;
+  }
+
+  .app-title {
+    font-size: 32px; /* Adjusted for mobile */
+  }
+
+  .welcome-text {
+    font-size: 22px;
+  }
+
+  .input-field,
+  .submit-btn,
+  .google-btn {
+    font-size: 16px;
+    padding: 12px;
+    width: 85%;
+  }
+}

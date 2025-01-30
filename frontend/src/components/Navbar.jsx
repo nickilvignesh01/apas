@@ -1,0 +1,60 @@
+import React, { useState } from "react";
+import { FaUserCircle, FaQuestionCircle, FaCommentDots, FaPhoneAlt, FaSignOutAlt } from "react-icons/fa"; // Added FaSignOutAlt
+import { Link, useNavigate } from "react-router-dom";
+import '../css/Navbar.css';
+
+const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
+  return (
+    <nav className="navbar">
+      {/* Logo */}
+      <div className="logo">APAS</div>
+
+      {/* Navigation Links */}
+      <ul className="nav-links">
+        <li><Link to="/dashboard">Dashboard</Link></li>
+        <li><Link to="/courses">Courses</Link></li>
+        <li><Link to="/assessments">Assessments</Link></li>
+        <li><Link to="/reports">Reports</Link></li>
+        <li><Link to="/help">Help</Link></li>
+      </ul>
+
+      {/* User Icon */}
+      <div className="user-icon" onClick={() => setIsOpen(!isOpen)}>
+        <FaUserCircle className="user-img" />
+        {isOpen && (
+          <div className="dropdown">
+            <Link to="/profile">
+              <FaUserCircle className="dropdown-icon" />
+              Profile
+            </Link>
+            <Link to="/help">
+              <FaQuestionCircle className="dropdown-icon" />
+              Help
+            </Link>
+            <Link to="/feedback">
+              <FaCommentDots className="dropdown-icon" />
+              Feedback
+            </Link>
+            <Link to="/contact-us">
+              <FaPhoneAlt className="dropdown-icon" />
+              Contact Us
+            </Link>
+            <button onClick={handleLogout}>
+              <FaSignOutAlt className="dropdown-icon" />
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;

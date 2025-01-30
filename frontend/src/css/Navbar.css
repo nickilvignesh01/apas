@@ -1,0 +1,90 @@
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Navbar Container */
+.navbar {
+    background-color: #460343;  /* Dark Purple */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 30px;
+}
+
+/* Logo */
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+/* Navigation Links */
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 50px;
+}
+
+.nav-links li a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    transition: 0.3s;
+}
+
+.nav-links li a:hover {
+    text-decoration: underline;
+}
+
+/* User Icon */
+.user-icon {
+    position: relative;
+    cursor: pointer;
+}
+
+/* User Icon Size */
+.user-img {
+    font-size: 30px;
+}
+
+/* Dropdown Menu */
+.dropdown {
+    position: absolute;
+    right: 0;
+    top: 40px;
+    background-color: white;
+    color: black;
+    width: 180px;
+    border-radius: 5px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    z-index: 100;
+    padding: 10px 0;
+}
+
+.dropdown a, .dropdown button {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    text-decoration: none;
+    color: black;
+    font-size: 14px;
+    background: transparent;
+    border: none;
+    width: 100%;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.dropdown a:hover, .dropdown button:hover {
+    background-color: #f0f0f0;
+}
+
+/* Icons inside dropdown */
+.dropdown-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}

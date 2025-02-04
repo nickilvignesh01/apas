@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, GoogleAuthProvider } from "firebase/auth";  // Import GoogleAuthProvider
+import { getFirestore } from "firebase/firestore";
 
-// Use environment variables from .env file
+// Firebase configuration
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -11,8 +12,11 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
+const db = getFirestore(app);
 
-export { auth, googleProvider };
+// Export necessary functions and providers
+const googleProvider = new GoogleAuthProvider();  // Initialize GoogleAuthProvider
+export { auth, db, signInWithEmailAndPassword, googleProvider };  // Export googleProvider

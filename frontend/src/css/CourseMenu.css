@@ -1,0 +1,128 @@
+/* CourseMenu.css */
+.course-menu-container {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.course-title {
+    font-size: 2.5rem;
+    color: #333;
+    text-align: center;
+    margin-bottom: 10px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.course-description {
+    text-align: center;
+    font-size: 5.6rem;
+    color: #f42222;
+    margin-bottom: 30px;
+    font-family: 'Roboto', sans-serif;
+}
+
+.syllabus-download {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.syllabus-download h3 {
+    font-size: 1.5rem;
+    color: #333;
+    font-family: 'Roboto', sans-serif;
+    margin-bottom: 10px;
+}
+
+.syllabus-download .btn {
+    background-color: #3e0254;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.syllabus-download .btn:hover {
+    background-color: #086203;
+    transform: translateY(-3px);
+}
+.course-actions {
+    text-align: center;
+    margin-top: 10px;
+  
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+    margin-top: 30px;
+}
+
+.action-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 550px; /* Set width of the buttons */
+    padding: 15px;
+    background-color: #49025b;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-family: 'Roboto', sans-serif;
+    font-weight: bold;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s, transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background-color: #ffffff;
+    color: #4b0358;
+    transform: translateY(-5px);
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.action-icon {
+    width: 60px;
+    height: 60px;
+    margin-right: 45px;
+   
+    transition: transform 0.2s ease;
+}
+
+.action-btn:hover .action-icon {
+    transform: scale(1.1);
+}
+
+.action-btn span {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+@media (max-width: 768px) {
+    .course-menu-container {
+        padding: 20px;
+    }
+
+    .course-title {
+        font-size: 2rem;
+    }
+
+    .action-btn {
+        width: 150px;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr 1fr;
+    }
+}

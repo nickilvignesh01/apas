@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -10,6 +11,8 @@ const authRoutes = require("./routes/authRoutes");
 const courseRoutes = require("./routes/courseRoutes");
 const assessmentRoutes = require("./routes/assessmentRoutes");
 const protectedRoutes = require("./routes/protectedRoutes");
+const classRoutes = require("./routes/classRoutes"); // New route for classes
+const studentRoutes = require("./routes/studentRoutes"); // New route for students
 
 dotenv.config(); // Load environment variables
 
@@ -19,6 +22,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // Form data support
+app.use("/uploads", express.static("uploads"));
 
 // Initialize Firebase Admin SDK
 if (process.env.FIREBASE_ADMIN_KEY) {
@@ -37,7 +41,6 @@ if (process.env.FIREBASE_ADMIN_KEY) {
 // MongoDB Connection with Retry Logic
 const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/academicDB";
 
-// Helper function for retrying MongoDB connection
 const connectDB = async () => {
   try {
     await mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -52,9 +55,11 @@ connectDB();
 
 // API Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/course", courseRoutes); // Correct route prefix
+app.use("/api/course", courseRoutes);
 app.use("/api/assessment", assessmentRoutes);
 app.use("/api/protected", protectedRoutes);
+app.use("/api/classes", classRoutes); // New route for classes
+app.use("/api/students", studentRoutes); // New route for students
 
 // Serve static files in production
 if (process.env.NODE_ENV === "production") {

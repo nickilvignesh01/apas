@@ -14,12 +14,26 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 30px;
+    height: 60px; /* Fixed height to prevent resizing */
 }
 
 /* Logo */
-.logo {
-    font-size: 24px;
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo-img {
+    width: 50px; /* Increased size */
+    height: 50px; /* Ensures proportional scaling */
+    object-fit: contain; /* Prevents stretching */
+    margin-right: 10px;
+}
+
+.logo-text {
+    font-size: 1.5rem;
     font-weight: bold;
+    color: #fff;
 }
 
 /* Navigation Links */

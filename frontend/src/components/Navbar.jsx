@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FaUserCircle, FaQuestionCircle, FaCommentDots, FaPhoneAlt, FaSignOutAlt } from "react-icons/fa"; // Added FaSignOutAlt
+import { FaUserCircle, FaQuestionCircle, FaCommentDots, FaPhoneAlt, FaSignOutAlt } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import '../css/Navbar.css';
 
@@ -14,7 +14,10 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       {/* Logo */}
-      <div className="logo">APAS</div>
+      <div className="logo-container">
+        <img src="/images/logo.png" alt="Logo" className="logo-img" />
+        <div className="logo-text">APAS</div>
+      </div>
 
       {/* Navigation Links */}
       <ul className="nav-links">

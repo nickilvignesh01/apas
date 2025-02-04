@@ -7,12 +7,14 @@ const Assessments = () => {
   const [pdfUpload, setPdfUpload] = useState(false);
   const [tutorials, setTutorials] = useState(0);
   const [assessmentsList, setAssessmentsList] = useState([]);
+  const [courseId, setCourseId] = useState(""); // Add state to manage courseId input
 
   useEffect(() => {
     // Fetch existing assessments when the component mounts
     const fetchAssessments = async () => {
       try {
         const response = await axios.get("http://localhost:5000/api/assessment");
+        // Ensuring that the course details are populated correctly
         setAssessmentsList(response.data);
       } catch (error) {
         console.error("Error fetching assessments:", error);
@@ -24,8 +26,9 @@ const Assessments = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Sample courseId; you can replace this with the courseId input
-    const courseId = "62cfe31c8d6b2b3d1e632d69"; // Replace with dynamic course ID
+    if (!courseId) {
+      return alert("Course ID is required");
+    }
 
     const newAssessment = {
       numAssignments: assignments,
@@ -49,6 +52,18 @@ const Assessments = () => {
       <h2 className="assessments-title">Assessment Details</h2>
 
       <form onSubmit={handleSubmit} className="assessments-form">
+        {/* Input for Course ID */}
+        <div className="form-group">
+          <label className="form-label">Course ID:</label>
+          <input
+            type="text"
+            value={courseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            className="form-input"
+            required
+          />
+        </div>
+
         <div className="form-group">
           <label className="form-label">No. of Assignments:</label>
           <input
@@ -90,13 +105,22 @@ const Assessments = () => {
       <div className="existing-assessments">
         <h3 className="existing-assessments-title">Existing Assessments</h3>
         <ul className="assessments-list">
-          {assessmentsList.map((assessment) => (
-            <li key={assessment._id} className="assessment-item">
-              <p><strong>Assignments:</strong> {assessment.numAssignments}</p>
-              <p><strong>PDF Upload:</strong> {assessment.pdfUpload ? "Yes" : "No"}</p>
-              <p><strong>Tutorials:</strong> {assessment.numTutorials}</p>
-            </li>
-          ))}
+          {assessmentsList.length > 0 ? (
+            assessmentsList.map((assessment) => (
+              <li key={assessment._id} className="assessment-item">
+                {/* Safely check if the courseId and courseCode are available */}
+                <p>
+                  <strong>Course Code:</strong>{" "}
+                  {assessment.courseId ? assessment.courseId.courseCode : "N/A"}
+                </p>
+                <p><strong>Assignments:</strong> {assessment.numAssignments}</p>
+                <p><strong>PDF Upload:</strong> {assessment.pdfUpload ? "Yes" : "No"}</p>
+                <p><strong>Tutorials:</strong> {assessment.numTutorials}</p>
+              </li>
+            ))
+          ) : (
+            <p>No assessments found.</p>
+          )}
         </ul>
       </div>
     </div>
@@ -104,3 +128,4 @@ const Assessments = () => {
 };
 
 export default Assessments;
+ 

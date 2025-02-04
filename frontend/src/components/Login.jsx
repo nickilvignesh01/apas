@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
 import { auth, googleProvider } from "../firebase";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +24,11 @@ const Login = () => {
         await auth.signOut();
         return;
       }
+
+      // Get the Firebase ID token and store it
+      const token = await user.getIdToken();
+      localStorage.setItem("token", token); // Store token in localStorage
+
       navigate("/dashboard");
     } catch (err) {
       setError(err.message);
@@ -36,37 +42,58 @@ const Login = () => {
       return;
     }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Get the Firebase ID token and store it
+      const token = await user.getIdToken();
+      localStorage.setItem("token", token); // Store token in localStorage
+
       navigate("/dashboard");
     } catch (err) {
-      setError(err.message);
+      setError("Invalid credentials. Please try again.");
     }
   };
 
   return (
     <div className="login-container">
-      <div className="image-container">
-        <h1 className="app-title">A P A S</h1>
+      <motion.div
+        className="app-logo"
+        initial={{ opacity: 0, scale: 2 }}
+        animate={{ opacity: [0, 1, 1, 0], scale: [3, 2.5, 2.5, 2] }}
+        transition={{ duration: 2, times: [0, 0.25, 0.75, 1] }}
+        style={{ position: "absolute", top: "40%", left: "45%", transform: "translate(-50%, -50%)" }}
+      >
+        <img src="/images/logo.png" alt="APAS Logo" style={{ width: "200px", height: "auto" }} />
+      </motion.div>
+
+      <motion.div
+        className="image-container"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 2.2, duration: 0.8 }}
+      >
         <h3 className="app-subtitle">"Academic Performance Analysis System"</h3>
         <img src="/images/login.png" alt="Login" className="login-image" />
-      </div>
-      <div className="login-content">
-        <h1 className="welcome-text">Welcome Back!</h1>
+      </motion.div>
 
-        {/* Google Login Button (Moved to the top) */}
+      <motion.div
+        className="login-content"
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 2.5, duration: 0.8 }}
+      >
+        <h1 className="welcome-text">APAS</h1>
+        <h2 className="welcome-text">Welcome Back!</h2>
         <div className="google-login">
           <button onClick={handleGoogleLogin} className="google-btn">
             <AiFillGoogleCircle size={30} className="google-icon" />
             Continue with Google
           </button>
         </div>
-
-        {/* OR Divider */}
         <div className="divider">
           <span>OR</span>
         </div>
-
-        {/* Email/Password Login */}
         {error && <p className="error-message">{error}</p>}
         <form onSubmit={handleEmailLogin} className="login-form">
           <div className="input-group">
@@ -91,7 +118,7 @@ const Login = () => {
           </div>
           <button type="submit" className="submit-btn">Login</button>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 };

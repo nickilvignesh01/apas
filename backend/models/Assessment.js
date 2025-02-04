@@ -23,8 +23,6 @@ const assessmentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Creating a model from the schema
 const Assessment = mongoose.model("Assessment", assessmentSchema);
 
-// Exporting the model so it can be used in the routes
 module.exports = Assessment;

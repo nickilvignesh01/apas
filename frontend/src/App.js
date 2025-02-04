@@ -1,16 +1,23 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
-import Dashboard from "./components/Dashboard";
-import Courses from "./components/courses";
-import AddNewCourse from "./components/AddNewCourse";
-import Assessments from "./components/Assessments";
-import Profile from "./components/Profile";
-import Login from "./components/Login";
-import Navbar from "./components/Navbar";
+import Dashboard from "./components/Dashboard.jsx";
+import Courses from "./components/Courses.jsx";
+import AddNewCourse from "./components/AddNewCourse.jsx";
+import Assessments from "./components/Assessments.jsx";
+import Profile from "./components/Profile.jsx";
+import Login from "./components/Login.jsx";
+import Navbar from "./components/Navbar.jsx";
+import MyClass from "./components/MyClass.jsx";
+import CourseMenu from "./components/CourseMenu.jsx";
+import Tutorials from "./components/Tutorials.jsx";
+import MarkEntry from "./components/MarkEntry.jsx";
+import Reports from "./components/Reports.jsx";
+import Consolidate from "./components/Consolidate.jsx";
+import PrivateRoute from "./components/PrivateRoute.jsx"; // Route Protection
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
-  const location = useLocation(); // Now it's inside the Router context
+  const location = useLocation(); // Ensures Navbar is hidden on /login
 
   const handleAddCourse = (newCourse) => {
     setCourses([...courses, newCourse]);
@@ -18,15 +25,56 @@ const AppContent = () => {
 
   return (
     <>
-      {location.pathname !== "/login" && <Navbar />}
+      {location.pathname !== "/login" && <Navbar />} {/* Hide Navbar on login page */}
       <Routes>
-        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/courses" element={<Courses courses={courses} />} />
-        <Route path="/add-course" element={<AddNewCourse onAddCourse={handleAddCourse} />} />
-        <Route path="/assessments" element={<Assessments />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/login" element={<Login />} />
+
+        {/* Protected Routes */}
+        <Route 
+          path="/dashboard" 
+          element={<PrivateRoute><Dashboard /></PrivateRoute>} 
+        />
+        <Route 
+          path="/courses" 
+          element={<PrivateRoute><Courses courses={courses} /></PrivateRoute>} 
+        />
+        <Route 
+          path="/add-course" 
+          element={<PrivateRoute><AddNewCourse onAddCourse={handleAddCourse} /></PrivateRoute>} 
+        />
+        <Route 
+          path="/assessments" 
+          element={<PrivateRoute><Assessments /></PrivateRoute>} 
+        />
+        <Route 
+          path="/profile" 
+          element={<PrivateRoute><Profile /></PrivateRoute>} 
+        />
+        <Route 
+          path="/myclass" 
+          element={<PrivateRoute><MyClass /></PrivateRoute>} 
+        />
+        <Route 
+          path="/course-menu/:courseId" 
+          element={<PrivateRoute><CourseMenu /></PrivateRoute>} 
+        />
+        <Route 
+          path="/tutorials/:courseId" 
+          element={<PrivateRoute><Tutorials /></PrivateRoute>} 
+        />
+        <Route 
+          path="/mark-entry/:courseId" 
+          element={<PrivateRoute><MarkEntry /></PrivateRoute>} 
+        />
+        <Route 
+          path="/reports/:courseId" 
+          element={<PrivateRoute><Reports /></PrivateRoute>} 
+        />
+        <Route 
+          path="/consolidate/:courseId" 
+          element={<PrivateRoute><Consolidate /></PrivateRoute>} 
+        />
       </Routes>
     </>
   );

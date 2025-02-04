@@ -11,6 +11,16 @@ const Profile = () => {
       <h2 className="profile-title">Profile</h2>
       <div className="profile-card">
         <div className="profile-info">
+          {/* Profile Picture */}
+          <div className="profile-pic-container">
+            <img
+              className="profile-pic"
+              src={user ? user.photoURL : "https://via.placeholder.com/150"} // Use a default image if the user has no photo
+              alt="Profile"
+            />
+          </div>
+          
+          {/* Profile Details */}
           <p className="profile-detail">
             <span className="profile-label">Name:</span>
             <span className="profile-value">{user ? user.displayName : "N/A"}</span>

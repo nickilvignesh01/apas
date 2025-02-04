@@ -41,7 +41,7 @@ const Dashboard = () => {
               { name: "assessments", icon: "/images/assess.png" },
               { name: "reports", icon: "/images/report.png" },
               { name: "profile", icon: "/images/profile.png" },
-              { name: "help", icon: "/images/help.png" },
+              { name: "MyClass", icon: "/images/help.png" },
             ].map((item, index) => (
               <Link
                 to={`/${item.name}`}

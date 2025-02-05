@@ -1,10 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "../firebase";
+import { auth, updateUserProfile } from "../firebase";
 import "../css/Profile.css"; // Import the CSS file
 
 const Profile = () => {
   const [user] = useAuthState(auth);
+
+  // Ensure profile picture is available for email/password users
+  useEffect(() => {
+    if (user) {
+      console.log("User Data:", user);
+      console.log("Profile Picture URL:", user?.photoURL);
+      updateUserProfile(user);
+    }
+  }, [user]);
 
   return (
     <div className="profile-container">
@@ -15,23 +24,27 @@ const Profile = () => {
           <div className="profile-pic-container">
             <img
               className="profile-pic"
-              src={user ? user.photoURL : "https://via.placeholder.com/150"} // Use a default image if the user has no photo
+              src={user?.photoURL || "https://via.placeholder.com/150"}
               alt="Profile"
+              onError={(e) => {
+                e.target.onerror = null; // Prevent infinite loop
+                e.target.src = "https://via.placeholder.com/150"; // Use default if broken
+              }}
             />
           </div>
-          
+
           {/* Profile Details */}
           <p className="profile-detail">
             <span className="profile-label">Name:</span>
-            <span className="profile-value">{user ? user.displayName : "N/A"}</span>
+            <span className="profile-value">{user?.displayName || "N/A"}</span>
           </p>
           <p className="profile-detail">
             <span className="profile-label">Email:</span>
-            <span className="profile-value">{user ? user.email : "N/A"}</span>
+            <span className="profile-value">{user?.email || "N/A"}</span>
           </p>
           <p className="profile-detail">
             <span className="profile-label">UID:</span>
-            <span className="profile-value">{user ? user.uid : "N/A"}</span>
+            <span className="profile-value">{user?.uid || "N/A"}</span>
           </p>
         </div>
       </div>

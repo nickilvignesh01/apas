@@ -72,11 +72,7 @@ const Tutorials = () => {
   const fetchCompletedTutorials = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/completed/${courseId}`);
-      if (res.data.length === 0) {
-        setCompletedTutorials([]); // Reset if data is deleted
-      } else {
-        setCompletedTutorials(res.data);
-      }
+      setCompletedTutorials(res.data || []);
     } catch (error) {
       console.error("Error fetching completed tutorials:", error);
     }

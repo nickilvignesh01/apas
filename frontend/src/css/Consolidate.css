@@ -1,0 +1,108 @@
+/* Basic styles for Consolidate page */
+.consolidate-container {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  h2 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #460343;
+  }
+  
+  .calculation-method {
+    margin-bottom: 20px;
+  }
+  
+  .calculation-method label {
+    margin-right: 20px;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .calculation-method input[type="radio"] {
+    margin-right: 10px;
+  }
+  
+  .consolidate-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .consolidate-table th,
+  .consolidate-table td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .consolidate-table th {
+    background-color: #460343;
+    color: white;
+    font-weight: bold;
+  }
+  
+  .consolidate-table td {
+    background-color: #f9f9f9;
+  }
+  
+  .consolidate-table tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .consolidate-table td input[type="number"] {
+    width: 80%;
+    padding: 5px;
+    text-align: center;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+  }
+  
+  .consolidate-table td input[type="number"]:focus {
+    outline: none;
+    border-color: #460343;
+  }
+  
+  .loading {
+    font-size: 1.5rem;
+    color: #ff0000;
+    text-align: center;
+  }
+  
+  .error {
+    font-size: 1.5rem;
+    color: #ff0000;
+    text-align: center;
+  }
+  
+  /* Style for empty state when no data is available */
+  .empty-state {
+    font-size: 1.2rem;
+    color: #666;
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 768px) {
+    .consolidate-table th,
+    .consolidate-table td {
+      padding: 8px;
+      font-size: 0.9rem;
+    }
+  
+    .consolidate-table {
+      font-size: 0.9rem;
+    }
+  
+    .consolidate-container {
+      padding: 15px;
+    }
+  
+    h2 {
+      font-size: 1.8rem;
+    }
+  }
+  

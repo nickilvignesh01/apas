@@ -62,10 +62,15 @@ router.get("/completed/:courseId", async (req, res) => {
 router.get("/:courseId", async (req, res) => {
   const { courseId } = req.params;
   try {
+    console.log("Fetching marks for course:", courseId); // Log courseId for debugging
+
+    // Fetch all marks for the given course
     const marks = await Mark.find({ courseId }).populate("courseId", "courseName");
 
     // Fetch student names based on roll numbers
     const studentRollNumbers = marks.map(mark => mark.rollNo);
+    console.log("Student roll numbers:", studentRollNumbers); // Log student roll numbers for debugging
+
     const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name");
 
     // Create a mapping of rollNo to studentName
@@ -77,6 +82,53 @@ router.get("/:courseId", async (req, res) => {
     // Attach student names to marks data
     const marksWithStudentNames = marks.map(mark => ({
       tutorialId: mark.tutorialId,
+      rollNo: mark.rollNo,
+      studentName: studentMap[mark.rollNo] || "Unknown", // Default if name is missing
+      marks: mark.marks,
+      maxMarks: mark.maxMarks
+    }));
+
+    res.json(marksWithStudentNames);
+  } catch (error) {
+    console.error("Error fetching marks:", error);
+    res.status(500).json({ error: "Error fetching marks" });
+  }
+});
+
+// 📌 Get All Students for a Course (GET /api/students/:courseId)
+router.get("/students/:courseId", async (req, res) => {
+  const { courseId } = req.params;
+  try {
+    // Fetch all students for the course (with all necessary details)
+    const students = await Student.find({ courseId }, "_id name rollNo");
+    res.json(students);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+    res.status(500).json({ error: "Error fetching students" });
+  }
+});
+
+// 📌 Get Marks for a Specific Tutorial (GET /api/tutorial-marks/:courseId/:tutorialId)
+router.get("/:courseId/:tutorialId", async (req, res) => {
+  const { courseId, tutorialId } = req.params;
+  try {
+    // Fetch marks based on courseId and tutorialId
+    const marks = await Mark.find({ courseId, tutorialId });
+
+    // Fetch student names based on roll numbers
+    const studentRollNumbers = marks.map(mark => mark.rollNo);
+    console.log("Student roll numbers:", studentRollNumbers);  // Log student roll numbers for debugging
+
+    const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name");
+
+    // Create a mapping of rollNo to studentName
+    const studentMap = {};
+    students.forEach(student => {
+      studentMap[student.rollNo] = student.name;
+    });
+
+    // Attach student names to marks data
+    const marksWithStudentNames = marks.map(mark => ({
       rollNo: mark.rollNo,
       studentName: studentMap[mark.rollNo] || "Unknown", // Default if name is missing
       marks: mark.marks,

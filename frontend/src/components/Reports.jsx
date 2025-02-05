@@ -1,62 +1,86 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
+import "../css/Reports.css"; // Assuming this is your styling file
 
-const Reports = ({ courseId }) => {
+const Reports = () => {
+  const { courseId } = useParams();
   const [marksData, setMarksData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [courseName, setCourseName] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Fetch marks for the course
+  useEffect(() => {
+    fetchMarks();
+  }, [courseId]);
+
+  // Fetch course name and marks for the course
   const fetchMarks = async () => {
-    if (!courseId) {
-      console.error("Error: courseId is undefined!");
-      return;
-    }
-
-    setLoading(true); // Set loading to true when starting the fetch
-
     try {
-      const response = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
-      setMarksData(response.data);  // Save marks data received from API
-    } catch (error) {
-      console.error("Error fetching marks:", error.response ? error.response.data : error.message);
-    }
+      // Fetch marks data for the course
+      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
+      setMarksData(res.data);
 
-    setLoading(false); // Set loading to false once data is fetched
+      // Fetch course name using the courseId (modify the API call as needed)
+      const courseRes = await axios.get(`http://localhost:5000/api/courses/${courseId}`);
+      setCourseName(courseRes.data.courseName);
+    } catch (error) {
+      console.error("Error fetching marks:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Group marks by tutorialId
+  const groupMarksByTutorial = () => {
+    return marksData.reduce((groups, mark) => {
+      const { tutorialId } = mark;
+      if (!groups[tutorialId]) {
+        groups[tutorialId] = [];
+      }
+      groups[tutorialId].push(mark);
+      return groups;
+    }, {});
+  };
+
+  const groupedMarks = groupMarksByTutorial();
+
   return (
-    <div>
-      <h2>Reports</h2>
+    <div className="reports-container">
+      <h2>Reports card</h2>
 
-      {/* Button to fetch tutorial marks */}
-      <button onClick={fetchMarks} disabled={loading}>
-        {loading ? "Loading..." : "View Tutorial Marks"}
-      </button>
-
-      {/* Display tutorial marks if available */}
-      {marksData.length > 0 && (
-        <table>
-          <thead>
-            <tr>
-              <th>Tutorial ID</th>
-              <th>Student Name</th>
-              <th>Marks</th>
-            </tr>
-          </thead>
-          <tbody>
-            {marksData.map((mark, index) => (
-              <tr key={index}>
-                <td>{mark.tutorialId}</td>
-                <td>{mark.studentName || "N/A"}</td> {/* Assuming backend sends studentName */}
-                <td>{mark.marks}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {loading ? (
+        <p>Loading marks...</p>
+      ) : (
+        <>
+          {Object.keys(groupedMarks).length > 0 ? (
+            Object.keys(groupedMarks).map((tutorialId) => (
+              <div key={tutorialId} className="tutorial-group">
+                <h3>Tutorial {tutorialId}</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Student Name</th>
+                      <th>Marks</th>
+                      <th>Max Marks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {groupedMarks[tutorialId].map((mark, index) => (
+                      <tr key={index}>
+                        <td>{mark.studentName}</td>
+                        <td>{mark.marks}</td>
+                        <td>{mark.maxMarks}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))
+          ) : (
+            <p>No marks available for this course.</p>
+          )}
+        </>
       )}
-
-      {/* Display message when no data is available */}
-      {marksData.length === 0 && !loading && <p>No marks available for this course.</p>}
     </div>
   );
 };

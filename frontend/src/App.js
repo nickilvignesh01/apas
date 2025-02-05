@@ -14,6 +14,9 @@ import MarkEntry from "./components/MarkEntry.jsx";
 import Reports from "./components/Reports.jsx";
 import Consolidate from "./components/Consolidate.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx"; // Route Protection
+import ViewMarks from "./components/ViewMarks.jsx";
+
+
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -55,18 +58,19 @@ const AppContent = () => {
           path="/myclass" 
           element={<PrivateRoute><MyClass /></PrivateRoute>} 
         />
+        <Route path="/view-marks/:courseId/:className/:tutorialId" element={<ViewMarks />} />
+
         <Route 
           path="/course-menu/:courseId" 
           element={<PrivateRoute><CourseMenu /></PrivateRoute>} 
         />
-        <Route 
-          path="/tutorials/:courseId" 
-          element={<PrivateRoute><Tutorials /></PrivateRoute>} 
-        />
-        <Route 
-          path="/mark-entry/:courseId" 
-          element={<PrivateRoute><MarkEntry /></PrivateRoute>} 
-        />
+
+        {/* Tutorials and Mark Entry routes */}
+        <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
+        <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
+
+
+        {/* Reports and Consolidate routes */}
         <Route 
           path="/reports/:courseId" 
           element={<PrivateRoute><Reports /></PrivateRoute>} 

@@ -6,11 +6,9 @@
   align-items: center;
   text-align: center;
   background: linear-gradient(135deg, #3c0039, #72057a, #360033);
-  flex-wrap: wrap;
-  padding: 20px;
 }
 
-/* Image container (Left Side) */
+/* Image container (Left Side) - Shifted Left */
 .image-container {
   width: 50%;
   display: flex;
@@ -19,29 +17,34 @@
   align-items: center;
   padding: 0 40px;
   text-align: center;
+ 
 }
 
-/* App Title */
+/* App Title - Shifted Left */
 .app-title {
   font-size: 36px;
   font-weight: bold;
   color: white;
   margin-bottom: 18px;
+  transform: translateX(-5%); /* Slight shift left */
 }
 
-/* App Subtitle */
+/* App Subtitle - Shifted Left */
 .app-subtitle {
   font-size: 24px;
   color: #e0e0e0;
-  margin-bottom: 40px;
+  margin-bottom: 80px;
+  transform: translateX(-20%); /* Slight shift left */
 }
+
 
 .login-image {
   max-width: 55%;
   height: auto;
+  transform: translateX(-23%);
 }
 
-/* Login Content */
+/* Login Content (Reduced Sizes) */
 .login-content {
   background-color: white;
   border-radius: 15px;
@@ -50,29 +53,29 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: auto;
-  width: 30%;
-  box-shadow: 0px 0px 30px 8px rgba(241, 167, 244, 0.3);
+  height: 75%;
+  width: 25%;
+  box-shadow: 0px 0px 30px 8px rgba(241, 167, 244, 0.3); /* Slightly reduced glow */
   padding: 30px;
   transition: box-shadow 0.3s ease;
 }
 
 .login-content:hover {
-  box-shadow: 0px 0px 50px 12px rgba(241, 167, 244, 0.7);
+  box-shadow: 0px 0px 50px 12px rgba(241, 167, 244, 0.7); /* Softer glow */
 }
 
 /* Welcome Text */
 .welcome-text {
-  font-size: 24px;
+  font-size: 24px; /* Decreased from 30px */
   font-weight: bold;
   color: #460343;
-  margin-bottom: 30px;
+  margin-bottom: 40px;
 }
 
 /* Form Input Styles */
 .input-group {
   width: 100%;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -80,20 +83,21 @@
 }
 
 .input-label {
-  font-size: 16px;
+  font-size: 16px; /* Decreased from 18px */
   font-weight: bold;
   color: #460343;
   margin-bottom: 6px;
-  width: 100%;
+  width: 150%; /* Reduced width */
 }
 
-/* Input Fields */
+/* Input Fields (Smaller) */
 .input-field {
-  width: 100%;
-  padding: 12px;
-  font-size: 14px;
+  width: 150%; /* Decreased width */
+  padding: 12px; /* Reduced padding */
+  font-size: 12px; /* Decreased text size */
   border-radius: 10px;
   border: 2px solid #620162;
+  box-sizing: border-box;
   background-color: #f9f9f9;
   transition: 0.3s;
   text-align: center;
@@ -104,11 +108,11 @@
   background-color: #fff;
 }
 
-/* Submit Button */
+/* Submit Button (Smaller) */
 .submit-btn {
-  width: 100%;
+  width: 75%;
   padding: 14px;
-  font-size: 18px;
+  font-size: 18px; /* Decreased from 20px */
   background-color: #460343;
   border: none;
   border-radius: 20px;
@@ -122,14 +126,14 @@
   background-color: #034c15;
 }
 
-/* Google Login Button */
+/* Google Login Button (Smaller) */
 .google-btn {
-  width: 100%;
+  width: 110%;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 12px;
-  font-size: 16px;
+  font-size: 16px; /* Reduced from 18px */
   font-weight: bold;
   background-color: #4285f4;
   color: white;
@@ -137,7 +141,8 @@
   border-radius: 20px;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
-  margin-top: 15px;
+  margin-bottom: 50px; /* Reduced space */
+  transform: translateX(-8%);
 }
 
 .google-btn:hover {
@@ -152,35 +157,34 @@
 /* Error Message */
 .error-message {
   color: #f44336;
-  font-size: 14px;
+  font-size: 14px; /* Reduced from 16px */
   font-weight: bold;
   margin-bottom: 12px;
 }
 
-/* ====== RESPONSIVENESS ====== */
-
-/* Tablets (max-width: 1024px) */
-@media (max-width: 1024px) {
+/* Mobile Responsiveness (Updated for smaller sizes) */
+@media (max-width: 768px) {
   .login-container {
     flex-direction: column;
   }
 
   .image-container {
     width: 100%;
-    padding: 20px;
+    padding: 0;
     margin-bottom: 20px;
   }
 
   .login-content {
-    width: 60%;
+    width: 85%;
     padding: 25px;
+    height: auto;
   }
 
   .app-title {
-    font-size: 32px;
+    font-size: 32px; /* Adjusted for mobile */
   }
 
-  .app-subtitle {
+  .welcome-text {
     font-size: 22px;
   }
 
@@ -189,81 +193,7 @@
   .google-btn {
     font-size: 16px;
     padding: 12px;
-  }
-}
-
-/* Mobile Phones (max-width: 768px) */
-@media (max-width: 768px) {
-  .login-container {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .image-container {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-  }
-
-  .login-content {
     width: 85%;
-    padding: 20px;
-  }
-
-  .app-title {
-    font-size: 28px;
-  }
-
-  .app-subtitle {
-    font-size: 20px;
-  }
-
-  .welcome-text {
-    font-size: 20px;
-  }
-
-  .input-field,
-  .submit-btn,
-  .google-btn {
-    font-size: 16px;
-    padding: 12px;
-    width: 100%;
   }
 }
 
-/* Small Mobile Devices (max-width: 480px) */
-@media (max-width: 480px) {
-  .login-container {
-    padding: 15px;
-  }
-
-  .image-container {
-    display: none; /* Hide image on very small screens */
-  }
-
-  .login-content {
-    width: 90%;
-    padding: 15px;
-  }
-
-  .app-title {
-    font-size: 24px;
-  }
-
-  .app-subtitle {
-    font-size: 18px;
-  }
-
-  .welcome-text {
-    font-size: 18px;
-  }
-
-  .input-field,
-  .submit-btn,
-  .google-btn {
-    font-size: 14px;
-    padding: 10px;
-    width: 100%;
-  }
-}

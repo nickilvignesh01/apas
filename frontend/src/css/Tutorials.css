@@ -1,0 +1,192 @@
+/* General Container Styles */
+.tutorials-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f4f8fc;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading Style */
+h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #3c3c3c;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Label Styling */
+label {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #5a5a5a;
+  margin-bottom: 8px;
+}
+
+/* Input and Select Styling */
+input[type="number"],
+select {
+  font-size: 1rem;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  margin-bottom: 15px;
+  width: 100%;
+  max-width: 300px;
+  transition: border-color 0.3s ease-in-out;
+}
+
+input[type="number"]:focus,
+select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Tutorial Input Area */
+.tutorial-input {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+/* Buttons Styling */
+button {
+  background-color: #007bff;
+  color: white;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+button:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+.add-tutorial-btn {
+  background-color: #28a745;
+}
+
+.add-tutorial-btn:hover {
+  background-color: #218838;
+}
+
+/* Stack Tutorial Buttons */
+.tutorial-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Space between buttons */
+  margin-top: 20px;
+}
+
+/* Individual Tutorial Button Styling */
+.tutorial-btn,
+.view-marks-btn,
+.edit-marks-btn {
+  background-color: #007bff;
+  color: white;
+  font-size: 1.1rem;
+  padding: 14px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  text-align: center;
+  display: inline-block;
+  width: 100%;
+  max-width: 250px;
+  transition: all 0.3s ease;
+}
+
+.tutorial-btn:hover,
+.view-marks-btn:hover,
+.edit-marks-btn:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+  opacity: 0.85;
+}
+
+/* Styling for View Marks and Edit Marks Buttons */
+.view-marks-btn {
+  background-color: #0069d9;
+}
+
+.edit-marks-btn {
+  background-color: #28a745;
+}
+
+.view-marks-btn:hover {
+  background-color: #004085;
+}
+
+.edit-marks-btn:hover {
+  background-color: #218838;
+}
+
+/* Last Button Styling (Add More Tutorials) */
+.add-tutorial-btn {
+  background-color: #dc3545; /* Different background for the last button */
+  width: 80%; /* Slightly smaller width to emphasize its uniqueness */
+}
+
+.add-tutorial-btn:hover {
+  background-color: #c82333;
+}
+
+/* Select Class Section */
+select {
+  font-size: 1rem;
+  padding: 10px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 350px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tutorials-container {
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .tutorial-input,
+  .tutorial-buttons {
+    margin-top: 15px;
+  }
+
+  .tutorial-buttons {
+    gap: 10px;
+  }
+
+  .tutorial-btn,
+  .view-marks-btn,
+  .edit-marks-btn {
+    width: 100%;
+    max-width: none;
+  }
+
+  .add-tutorial-btn {
+    width: 100%;
+    max-width: none;
+  }
+}

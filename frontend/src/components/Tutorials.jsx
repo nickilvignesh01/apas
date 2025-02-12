@@ -83,8 +83,8 @@ const Tutorials = () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
       if (res.data.length === 0) {
-        setSavedMarks({}); // Reset if no marks found in MongoDB
-        localStorage.removeItem(`numTutorials_${courseId}`); // Clear localStorage if no data
+        setSavedMarks({});
+        localStorage.removeItem(`numTutorials_${courseId}`);
         localStorage.removeItem(`maxMarks_${courseId}`);
       } else {
         const marksData = {};
@@ -103,16 +103,51 @@ const Tutorials = () => {
     if (isSaved) {
       const newTutorials = Array.from({ length: numTutorials }, (_, index) => ({
         tutorialId: index + 1,
-        maxMarks: maxMarks[index + 1] || 100,
+        maxMarks: maxMarks[index + 1] || 100, // Default max marks to 100 if not set
       }));
       setTutorials(newTutorials);
     }
   }, [isSaved, numTutorials, maxMarks]);
 
+  // Update Max Marks for a Tutorial
+  const handleMaxMarksChange = (tutorialId, value) => {
+    setMaxMarks((prev) => ({
+      ...prev,
+      [tutorialId]: value,
+    }));
+  };
+
   // Add More Tutorials
   const addMoreTutorials = () => {
     setNumTutorials((prev) => prev + 1);
     localStorage.setItem(`numTutorials_${courseId}`, numTutorials + 1);
+  };
+
+  // Delete All Tutorials
+  const deleteAllTutorials = async () => {
+    if (!window.confirm("Are you sure you want to delete all tutorials?")) return;
+
+    try {
+      const response = await axios.delete(`http://localhost:5000/api/tutorial-marks/${courseId}`);
+
+      if (response.status === 200) {
+        setNumTutorials(0);
+        setMaxMarks({});
+        setTutorials([]);
+        setIsSaved(false);
+        localStorage.removeItem(`numTutorials_${courseId}`);
+        localStorage.removeItem(`maxMarks_${courseId}`);
+
+        alert("All tutorials deleted successfully!");
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        alert("No tutorials found to delete.");
+      } else {
+        console.error("Error deleting tutorials:", error);
+        alert("Failed to delete tutorials. Check console for details.");
+      }
+    }
   };
 
   return (
@@ -132,6 +167,7 @@ const Tutorials = () => {
       {/* Enter Number of Tutorials (Only if not saved) */}
       {!isSaved && (
         <div className="tutorial-input">
+          <label>Enter No. of Tutorials:</label>
           <input
             type="number"
             placeholder="Enter number of tutorials"
@@ -143,21 +179,6 @@ const Tutorials = () => {
         </div>
       )}
 
-      {/* Enter Max Marks for Each Tutorial (Only if not saved) */}
-      {!isSaved &&
-        numTutorials > 0 &&
-        Array.from({ length: numTutorials }, (_, index) => index + 1).map((num) => (
-          <div key={num} className="tutorial-max-marks">
-            <label>Max Marks for Tutorial {num}:</label>
-            <input
-              type="number"
-              value={maxMarks[num] || ""}
-              onChange={(e) => setMaxMarks({ ...maxMarks, [num]: Number(e.target.value) })}
-              min="1"
-            />
-          </div>
-        ))}
-
       {/* Add More Tutorials Button */}
       {isSaved && (
         <button className="add-tutorial-btn" onClick={addMoreTutorials}>
@@ -165,7 +186,14 @@ const Tutorials = () => {
         </button>
       )}
 
-      {/* Tutorial Buttons */}
+      {/* Delete All Tutorials Button */}
+      {isSaved && tutorials.length > 0 && (
+        <button className="delete-tutorial-btn" onClick={deleteAllTutorials}>
+          Delete All Tutorials
+        </button>
+      )}
+
+      {/* Tutorial List */}
       {isSaved && tutorials.length > 0 && (
         <div className="tutorial-buttons">
           {tutorials.map((tut) => {
@@ -173,30 +201,31 @@ const Tutorials = () => {
             const savedMark = savedMarks[tut.tutorialId];
 
             return (
-              <div key={tut.tutorialId}>
-                {isCompleted || savedMark ? (
-                  <div>
-                    <Link
-                      to={`/view-marks/${courseId}/${selectedClass}/${tut.tutorialId}`}
-                      className="view-marks-btn"
-                    >
-                      View Tutorial {tut.tutorialId} Marks
-                    </Link>
-                    <Link
-                      to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${tut.maxMarks}`}
-                      className="edit-marks-btn"
-                    >
-                      Edit Marks
-                    </Link>
-                  </div>
-                ) : (
+              <div key={tut.tutorialId} className="tutorial-item">
+                <label>Max Marks:</label>
+                <input
+                  type="number"
+                  value={maxMarks[tut.tutorialId] || 100}
+                  onChange={(e) => handleMaxMarksChange(tut.tutorialId, Number(e.target.value))}
+                />
+
+                <div className="tutorial-actions">
+                  {/* Edit Marks Button */}
                   <Link
-                    to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${tut.maxMarks}`}
-                    className="tutorial-btn"
+                    to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${maxMarks[tut.tutorialId] || 100}`}
+                    className="edit-btn"
                   >
-                    Enter Marks for Tutorial {tut.tutorialId}
+                    {isCompleted || savedMark ? "Edit Marks" : `Enter Marks`}
                   </Link>
-                )}
+
+                  {/* View Marks Button */}
+                  <Link
+                    to={`/view-marks/${courseId}/${tut.tutorialId}`}
+                    className="view-btn"
+                  >
+                    View Marks
+                  </Link>
+                </div>
               </div>
             );
           })}

@@ -16,8 +16,6 @@ import Consolidate from "./components/Consolidate.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx"; // Route Protection
 import ViewMarks from "./components/ViewMarks.jsx";
 
-
-
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
   const location = useLocation(); // Ensures Navbar is hidden on /login
@@ -34,51 +32,25 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
 
         {/* Protected Routes */}
-        <Route 
-          path="/dashboard" 
-          element={<PrivateRoute><Dashboard /></PrivateRoute>} 
-        />
-        <Route 
-          path="/courses" 
-          element={<PrivateRoute><Courses courses={courses} /></PrivateRoute>} 
-        />
-        <Route 
-          path="/add-course" 
-          element={<PrivateRoute><AddNewCourse onAddCourse={handleAddCourse} /></PrivateRoute>} 
-        />
-        <Route 
-          path="/assessments" 
-          element={<PrivateRoute><Assessments /></PrivateRoute>} 
-        />
-        <Route 
-          path="/profile" 
-          element={<PrivateRoute><Profile /></PrivateRoute>} 
-        />
-        <Route 
-          path="/myclass" 
-          element={<PrivateRoute><MyClass /></PrivateRoute>} 
-        />
-        <Route path="/view-marks/:courseId/:className/:tutorialId" element={<ViewMarks />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/courses" element={<PrivateRoute><Courses courses={courses} /></PrivateRoute>} />
+        <Route path="/add-course" element={<PrivateRoute><AddNewCourse onAddCourse={handleAddCourse} /></PrivateRoute>} />
+        <Route path="/assessments" element={<PrivateRoute><Assessments /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/myclass" element={<PrivateRoute><MyClass /></PrivateRoute>} />
 
-        <Route 
-          path="/course-menu/:courseId" 
-          element={<PrivateRoute><CourseMenu /></PrivateRoute>} 
-        />
+        {/* 📌 Fixed ViewMarks Route */}
+        <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
+
+        <Route path="/course-menu/:courseId" element={<PrivateRoute><CourseMenu /></PrivateRoute>} />
 
         {/* Tutorials and Mark Entry routes */}
         <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
-        <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
-
+        <Route path="/mark-entry/:courseId/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
 
         {/* Reports and Consolidate routes */}
-        <Route 
-          path="/reports/:courseId" 
-          element={<PrivateRoute><Reports /></PrivateRoute>} 
-        />
-        <Route 
-          path="/consolidate/:courseId" 
-          element={<PrivateRoute><Consolidate /></PrivateRoute>} 
-        />
+        <Route path="/reports/:courseId" element={<PrivateRoute><Reports /></PrivateRoute>} />
+        <Route path="/consolidate/:courseId" element={<PrivateRoute><Consolidate /></PrivateRoute>} />
       </Routes>
     </>
   );

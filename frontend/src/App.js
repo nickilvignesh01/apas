@@ -31,7 +31,6 @@ const AppContent = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
 
-        {/* Protected Routes */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/courses" element={<PrivateRoute><Courses courses={courses} /></PrivateRoute>} />
         <Route path="/add-course" element={<PrivateRoute><AddNewCourse onAddCourse={handleAddCourse} /></PrivateRoute>} />
@@ -41,7 +40,10 @@ const AppContent = () => {
         <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
         <Route path="/course-menu/:courseId" element={<PrivateRoute><CourseMenu /></PrivateRoute>} />
         <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
+
+        {/* ✅ Fix: Include `className` in the route path */}
         <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
+
         <Route path="/reports/:courseId" element={<PrivateRoute><Reports /></PrivateRoute>} />
         <Route path="/consolidate/:courseId" element={<PrivateRoute><Consolidate /></PrivateRoute>} />
       </Routes>

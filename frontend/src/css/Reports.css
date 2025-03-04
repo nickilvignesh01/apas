@@ -1,4 +1,24 @@
-/* Basic Reset */
+.button-container {
+  display: flex;
+  justify-content: center; /* Centers the button horizontally */
+  margin-top: 20px; /* Adds spacing above the button */
+}
+
+.export-btn {
+  padding: 10px 15px;
+  background-color: #460343;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  display: inline-block;
+}
+
+.export-btn:hover {
+  background-color: #03460f;
+}
+
+
 * {
     margin: 0;
     padding: 0;
@@ -154,4 +174,4 @@
   .pagination a:hover {
     background-color: #0056b3;
   }
-  
+

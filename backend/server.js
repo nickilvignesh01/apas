@@ -72,20 +72,20 @@ if (process.env.NODE_ENV === "production") {
   });
 } else {
   app.get("/", (req, res) => {
-    res.send("🚀 API is running...");
+    res.send("🚀 API is running");
   });
 }
 
-// ✅ Global Error Handler
+
 app.use((err, req, res, next) => {
   console.error("❌ Global Error:", err.message);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-// ✅ Start Server
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
 
 module.exports = app;

@@ -12,10 +12,11 @@ const ViewMarks = () => {
     fetchMarks();
   }, [courseId, tutorialId]);
 
+  // Function to fetch marks from the server
   const fetchMarks = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
-      setMarks(res.data);
+      setMarks(res.data); // Update the state with the latest marks
     } catch (error) {
       console.error("Error fetching marks:", error);
     } finally {
@@ -41,7 +42,7 @@ const ViewMarks = () => {
           <tbody>
             {marks.length > 0 ? (
               marks.map((mark) => (
-                <tr key={`${mark.rollNo}-${tutorialId}`}>
+                <tr key={`${mark.rollNo}-${tutorialId}`}> {/* Unique key to avoid duplication */}
                   <td>{mark.rollNo}</td>
                   <td>{mark.studentName}</td>
                   <td>{mark.marks} / {mark.maxMarks}</td>

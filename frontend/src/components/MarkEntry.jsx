@@ -4,14 +4,14 @@ import axios from "axios";
 import "../css/MarkEntry.css";
 
 const MarkEntry = () => {
-  const { courseId, className, tutorialId, maxMarks } = useParams();
+  const { courseId, className, tutorialId, maxMarks } = useParams(); // ✅ Extract className
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [marks, setMarks] = useState({});
 
   useEffect(() => {
     fetchStudents();
-    fetchSavedMarks(); // Fetch saved marks for editing
+    fetchSavedMarks();
   }, [courseId, className, tutorialId]);
 
   // Fetch Students
@@ -24,30 +24,25 @@ const MarkEntry = () => {
     }
   };
 
-  // Fetch Saved Marks for the tutorial
-// Fetch Saved Marks for the tutorial
-const fetchSavedMarks = async () => {
-  try {
-    // Use correct URL with courseId and tutorialId
-    const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
-    
-    // Check if response data exists
-    if (res.data && Array.isArray(res.data)) {
-      const savedMarks = {};
-      res.data.forEach((entry) => {
-        savedMarks[entry.rollNo] = entry.marks;  // Save marks by rollNo
-      });
-      setMarks(savedMarks); // Update the state with the saved marks
-    } else {
-      console.error("No saved marks found or invalid response");
+  // Fetch Saved Marks
+  const fetchSavedMarks = async () => {
+    try {
+      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
+      if (res.data && Array.isArray(res.data)) {
+        const savedMarks = {};
+        res.data.forEach((entry) => {
+          savedMarks[entry.rollNo] = entry.marks;
+        });
+        setMarks(savedMarks);
+      } else {
+        console.error("No saved marks found.");
+      }
+    } catch (error) {
+      console.error("Error fetching saved marks:", error);
     }
-  } catch (error) {
-    console.error("Error fetching saved marks:", error);
-  }
-};
+  };
 
-
-  // Handle Mark Entry Change (user editing the marks)
+  // Handle Mark Entry
   const handleMarkChange = (rollNo, value) => {
     const enteredMark = Number(value);
     if (enteredMark > Number(maxMarks)) {
@@ -57,7 +52,7 @@ const fetchSavedMarks = async () => {
     setMarks({ ...marks, [rollNo]: enteredMark });
   };
 
-  // Save Marks and Complete Tutorial
+  // Save Marks
   const saveMarks = async () => {
     if (!courseId || !tutorialId) {
       console.error("Error: courseId or tutorialId is missing!");
@@ -73,15 +68,9 @@ const fetchSavedMarks = async () => {
       maxMarks,
     }));
 
-    console.log("Sending request data:", requestData); // Debugging log
-
     try {
       await axios.post("http://localhost:5000/api/tutorial-marks", requestData);
-
-      await axios.post("http://localhost:5000/api/tutorial-marks/complete-tutorial", {
-        courseId,
-        tutorialId,
-      });
+      await axios.post("http://localhost:5000/api/tutorial-marks/complete-tutorial", { courseId, tutorialId });
 
       alert("Marks saved successfully!");
       navigate(`/tutorials/${courseId}`);
@@ -112,7 +101,7 @@ const fetchSavedMarks = async () => {
               <td>
                 <input
                   type="number"
-                  value={marks[student.rollNo] || ""} // Pre-populate with saved marks
+                  value={marks[student.rollNo] || ""}
                   onChange={(e) => handleMarkChange(student.rollNo, e.target.value)}
                   min="0"
                   max={maxMarks}

@@ -13,12 +13,12 @@ import Tutorials from "./components/Tutorials.jsx";
 import MarkEntry from "./components/MarkEntry.jsx";
 import Reports from "./components/Reports.jsx";
 import Consolidate from "./components/Consolidate.jsx";
-import PrivateRoute from "./components/PrivateRoute.jsx"; // Route Protection
+import PrivateRoute from "./components/PrivateRoute.jsx";
 import ViewMarks from "./components/ViewMarks.jsx";
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
-  const location = useLocation(); // Ensures Navbar is hidden on /login
+  const location = useLocation();
 
   const handleAddCourse = (newCourse) => {
     setCourses([...courses, newCourse]);
@@ -26,7 +26,7 @@ const AppContent = () => {
 
   return (
     <>
-      {location.pathname !== "/login" && <Navbar />} {/* Hide Navbar on login page */}
+      {location.pathname !== "/login" && <Navbar />}
       <Routes>
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
@@ -38,17 +38,10 @@ const AppContent = () => {
         <Route path="/assessments" element={<PrivateRoute><Assessments /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/myclass" element={<PrivateRoute><MyClass /></PrivateRoute>} />
-
-        {/* 📌 Fixed ViewMarks Route */}
         <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
-
         <Route path="/course-menu/:courseId" element={<PrivateRoute><CourseMenu /></PrivateRoute>} />
-
-        {/* Tutorials and Mark Entry routes */}
         <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
-        <Route path="/mark-entry/:courseId/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
-
-        {/* Reports and Consolidate routes */}
+        <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
         <Route path="/reports/:courseId" element={<PrivateRoute><Reports /></PrivateRoute>} />
         <Route path="/consolidate/:courseId" element={<PrivateRoute><Consolidate /></PrivateRoute>} />
       </Routes>

@@ -23,7 +23,7 @@ const Tutorials = () => {
     loadSavedData();
   }, [courseId]);
 
-  // Load saved data from localStorage
+
   const loadSavedData = () => {
     const savedNumTutorials = localStorage.getItem(`numTutorials_${courseId}`);
     const savedMaxMarks = localStorage.getItem(`maxMarks_${courseId}`);
@@ -38,14 +38,14 @@ const Tutorials = () => {
     }
   };
 
-  // Save tutorial data to localStorage
+ 
   const saveTutorialData = () => {
     localStorage.setItem(`numTutorials_${courseId}`, numTutorials);
     localStorage.setItem(`maxMarks_${courseId}`, JSON.stringify(maxMarks));
     setIsSaved(true);
   };
 
-  // Fetch Course Details
+  
   const fetchCourseDetails = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/course/${courseId}`);
@@ -55,7 +55,7 @@ const Tutorials = () => {
     }
   };
 
-  // Fetch Available Classes
+ 
   const fetchClasses = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/classes");
@@ -68,7 +68,7 @@ const Tutorials = () => {
     }
   };
 
-  // Fetch Completed Tutorials
+
   const fetchCompletedTutorials = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/completed/${courseId}`);
@@ -78,7 +78,7 @@ const Tutorials = () => {
     }
   };
 
-  // Fetch Saved Marks
+  
   const fetchSavedMarks = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
@@ -98,23 +98,23 @@ const Tutorials = () => {
     }
   };
 
-  // Generate Tutorials when number of tutorials is saved
+
   useEffect(() => {
     if (isSaved) {
       const newTutorials = Array.from({ length: numTutorials }, (_, index) => ({
         tutorialId: index + 1,
-        maxMarks: maxMarks[index + 1] || 100, // Default max marks to 100 if not set
+        maxMarks: maxMarks[index + 1] || 100,
       }));
       setTutorials(newTutorials);
     }
   }, [isSaved, numTutorials, maxMarks]);
 
-  // Update Max Marks for a Tutorial
+  
+  
   const handleMaxMarksChange = (tutorialId, value) => {
-    setMaxMarks((prev) => ({
-      ...prev,
-      [tutorialId]: value,
-    }));
+    const updatedMaxMarks = { ...maxMarks, [tutorialId]: value };
+    setMaxMarks(updatedMaxMarks);
+    localStorage.setItem(`maxMarks_${courseId}`, JSON.stringify(updatedMaxMarks)); 
   };
 
   // Add More Tutorials
@@ -196,18 +196,24 @@ const Tutorials = () => {
       {/* Tutorial List */}
       {isSaved && tutorials.length > 0 && (
         <div className="tutorial-buttons">
-          {tutorials.map((tut) => {
+          {tutorials.map((tut, index) => {
             const isCompleted = completedTutorials.includes(tut.tutorialId);
             const savedMark = savedMarks[tut.tutorialId];
 
             return (
               <div key={tut.tutorialId} className="tutorial-item">
-                <label>Max Marks:</label>
-                <input
-                  type="number"
-                  value={maxMarks[tut.tutorialId] || 100}
-                  onChange={(e) => handleMaxMarksChange(tut.tutorialId, Number(e.target.value))}
-                />
+                <h3>Tutorial {index + 1}</h3>
+                {/* Render max marks input only if the button is "Enter Marks" */}
+                {!isCompleted && !savedMark && (
+                  <div>
+                    <label>Max Marks:</label>
+                    <input
+                      type="number"
+                      value={maxMarks[tut.tutorialId] || 100}
+                      onChange={(e) => handleMaxMarksChange(tut.tutorialId, Number(e.target.value))}
+                    />
+                  </div>
+                )}
 
                 <div className="tutorial-actions">
                   {/* Edit Marks Button */}
@@ -215,7 +221,7 @@ const Tutorials = () => {
                     to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${maxMarks[tut.tutorialId] || 100}`}
                     className="edit-btn"
                   >
-                    {isCompleted || savedMark ? "Edit Marks" : `Enter Marks`}
+                    {isCompleted || savedMark ? "Edit Marks" : "Enter Marks"}
                   </Link>
 
                   {/* View Marks Button */}

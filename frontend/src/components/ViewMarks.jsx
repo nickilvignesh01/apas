@@ -16,7 +16,16 @@ const ViewMarks = () => {
   const fetchMarks = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
-      setMarks(res.data); // Update the state with the latest marks
+
+      // Filter to keep only the latest marks for each student
+      const latestMarks = Object.values(
+        res.data.reduce((acc, mark) => {
+          acc[mark.rollNo] = mark; // Keep only the last occurrence of each rollNo
+          return acc;
+        }, {})
+      );
+
+      setMarks(latestMarks);
     } catch (error) {
       console.error("Error fetching marks:", error);
     } finally {
@@ -42,7 +51,7 @@ const ViewMarks = () => {
           <tbody>
             {marks.length > 0 ? (
               marks.map((mark) => (
-                <tr key={`${mark.rollNo}-${tutorialId}`}> {/* Unique key to avoid duplication */}
+                <tr key={mark.rollNo}> {/* Unique key based on roll number */}
                   <td>{mark.rollNo}</td>
                   <td>{mark.studentName}</td>
                   <td>{mark.marks} / {mark.maxMarks}</td>

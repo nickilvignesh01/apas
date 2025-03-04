@@ -5,6 +5,9 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const path = require("path");
 const admin = require("firebase-admin");
+const multer = require("multer");
+const pdfParse = require("pdf-parse");
+const XLSX = require("xlsx");
 
 // Import Routes
 const authRoutes = require("./routes/authRoutes");
@@ -13,18 +16,18 @@ const assessmentRoutes = require("./routes/assessmentRoutes");
 const protectedRoutes = require("./routes/protectedRoutes");
 const classRoutes = require("./routes/classRoutes");
 const studentRoutes = require("./routes/studentRoutes");
-const markRoutes = require("./routes/marks"); // 📌 New route for Marks
-const tutorialMarksRoutes = require('./routes/tutorialMarks');
+const markRoutes = require("./routes/marks");
+const tutorialMarksRoutes = require("./routes/tutorialMarks");
 
 const app = express();
 
 // ✅ Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // Supports form data
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 
-// ✅ Initialize Firebase Admin SDK (Only if Key is Available)
+// ✅ Initialize Firebase Admin SDK
 if (process.env.FIREBASE_ADMIN_KEY) {
   try {
     admin.initializeApp({
@@ -47,7 +50,7 @@ const connectDB = async () => {
     console.log("✅ MongoDB connected");
   } catch (err) {
     console.error("❌ MongoDB Connection Error:", err.message);
-    setTimeout(connectDB, 5000); // Retry connection after 5 seconds
+    setTimeout(connectDB, 5000);
   }
 };
 
@@ -60,8 +63,75 @@ app.use("/api/assessment", assessmentRoutes);
 app.use("/api/protected", protectedRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/students", studentRoutes);
-app.use("/api/marks", markRoutes); // 📌 New route for Mark Entry
-app.use('/api/tutorial-marks', tutorialMarksRoutes); // 📌 New route for Tutorial Marks
+app.use("/api/marks", markRoutes);
+app.use("/api/tutorial-marks", tutorialMarksRoutes);
+
+// ✅ Multer Storage for File Uploads
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  const fileType = req.file.mimetype;
+  console.log(`📂 Uploaded File Type: ${fileType}`);
+
+  try {
+    let extractedMarks = {};
+
+    // 📌 1️⃣ Excel Processing
+    if (fileType.includes("spreadsheet") || fileType.includes("excel")) {
+      const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(sheet);
+
+      console.log("📊 Extracted Excel Data:", data);
+
+      data.forEach((row) => {
+        if (row["Roll No"] && row["Marks"]) {
+          const rollNo = row["Roll No"].toString().trim().toLowerCase(); // Normalize to lowercase
+          extractedMarks[rollNo] = Number(row["Marks"]);
+        }
+      });
+    }
+
+    // 📌 2️⃣ FIXED PDF Processing (Handles Uppercase & Formatting)
+    else if (fileType === "application/pdf") {
+      const pdfData = await pdfParse(req.file.buffer);
+      const text = pdfData.text;
+
+      console.log("📄 Extracted PDF Text:\n", text);
+
+      const lines = text.split("\n").map((line) => line.trim()).filter((line) => line);
+
+      console.log("📄 Lines from PDF:", lines);
+
+      lines.forEach((line) => {
+        const parts = line.split(/\s+/); // Split by spaces
+
+        if (parts.length >= 3) {
+          let rollNo = parts[0].trim();
+          const marks = parseInt(parts[2], 10); // Extracting the marks
+
+          if (!isNaN(marks)) {
+            rollNo = rollNo.toLowerCase(); // Normalize roll number
+            extractedMarks[rollNo] = marks;
+          }
+        }
+      });
+
+      console.log("📊 Extracted Marks from PDF:", extractedMarks);
+    } else {
+      return res.status(400).json({ error: "Only Excel and PDF files are supported" });
+    }
+
+    res.json({ marks: extractedMarks });
+  } catch (error) {
+    console.error("❌ Error Processing File:", error);
+    res.status(500).json({ error: "Error processing file" });
+  }
+});
+
 
 // ✅ Serve Static Files in Production
 if (process.env.NODE_ENV === "production") {
@@ -76,13 +146,13 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-
+// ✅ Global Error Handling
 app.use((err, req, res, next) => {
   console.error("❌ Global Error:", err.message);
   res.status(500).json({ error: "Internal Server Error" });
 });
 
-
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);

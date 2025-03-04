@@ -19,6 +19,9 @@ const studentRoutes = require("./routes/studentRoutes");
 const markRoutes = require("./routes/marks");
 const tutorialMarksRoutes = require("./routes/tutorialMarks");
 
+// Import Student Model
+const Student = require("./models/Student"); // Ensure you have a Student model
+
 const app = express();
 
 // ✅ Middleware
@@ -70,6 +73,7 @@ app.use("/api/tutorial-marks", tutorialMarksRoutes);
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+/* 📌 1️⃣ API: Upload Marks from Excel or PDF */
 app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
@@ -79,7 +83,7 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
   try {
     let extractedMarks = {};
 
-    // 📌 1️⃣ Excel Processing
+    // 📌 Excel Processing
     if (fileType.includes("spreadsheet") || fileType.includes("excel")) {
       const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -89,13 +93,13 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
 
       data.forEach((row) => {
         if (row["Roll No"] && row["Marks"]) {
-          const rollNo = row["Roll No"].toString().trim().toLowerCase(); // Normalize to lowercase
+          const rollNo = row["Roll No"].toString().trim().toLowerCase(); // Normalize roll number
           extractedMarks[rollNo] = Number(row["Marks"]);
         }
       });
     }
 
-    // 📌 2️⃣ FIXED PDF Processing (Handles Uppercase & Formatting)
+    // 📌 PDF Processing
     else if (fileType === "application/pdf") {
       const pdfData = await pdfParse(req.file.buffer);
       const text = pdfData.text;
@@ -104,17 +108,14 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
 
       const lines = text.split("\n").map((line) => line.trim()).filter((line) => line);
 
-      console.log("📄 Lines from PDF:", lines);
-
       lines.forEach((line) => {
         const parts = line.split(/\s+/); // Split by spaces
 
         if (parts.length >= 3) {
-          let rollNo = parts[0].trim();
+          let rollNo = parts[0].trim().toLowerCase();
           const marks = parseInt(parts[2], 10); // Extracting the marks
 
           if (!isNaN(marks)) {
-            rollNo = rollNo.toLowerCase(); // Normalize roll number
             extractedMarks[rollNo] = marks;
           }
         }
@@ -126,6 +127,50 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
     }
 
     res.json({ marks: extractedMarks });
+  } catch (error) {
+    console.error("❌ Error Processing File:", error);
+    res.status(500).json({ error: "Error processing file" });
+  }
+});
+app.post("/api/upload-students", upload.single("file"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  const className = req.body.className;
+  if (!className) return res.status(400).json({ error: "Class name is required" });
+
+  const fileType = req.file.mimetype;
+  console.log(`📂 Uploaded File Type: ${fileType}`);
+
+  try {
+    let extractedStudents = [];
+
+    if (fileType === "application/pdf") {
+      const pdfData = await pdfParse(req.file.buffer);
+      const text = pdfData.text;
+      console.log("📄 Extracted PDF Text:\n", text);
+
+      const lines = text.split("\n").map((line) => line.trim()).filter((line) => line);
+
+      lines.forEach((line) => {
+        const parts = line.split(/\s+/);
+        if (parts.length >= 3) {
+          let rollNo = parts[0].trim().toLowerCase();
+          let name = parts[1].trim();
+          let email = parts[2].trim();
+          if (email.includes("@")) {
+            extractedStudents.push({ rollNo, name, email, className });
+          }
+        }
+      });
+
+      console.log("📊 Extracted Students:", extractedStudents);
+      if (extractedStudents.length > 0) {
+        await Student.insertMany(extractedStudents, { ordered: false }).catch(err => {
+          console.error("⚠️ Some students might already exist:", err);
+        });
+      }
+    }
+
+    res.json({ students: extractedStudents });
   } catch (error) {
     console.error("❌ Error Processing File:", error);
     res.status(500).json({ error: "Error processing file" });

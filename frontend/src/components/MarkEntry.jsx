@@ -95,7 +95,7 @@ const MarkEntry = () => {
       className,
       rollNo: student.rollNo,
       tutorialId,
-      marks: marks[student.rollNo] || 0, // ✅ Ensure marks are correctly saved
+      marks: marks[student.rollNo] || 0, 
       maxMarks,
     }));
 
@@ -144,7 +144,7 @@ const MarkEntry = () => {
               <td>
                 <input
                   type="number"
-                  value={marks[student.rollNo] ?? ""} // ✅ Marks will now show correctly
+                  value={marks[student.rollNo] ?? ""} 
                   onChange={(e) => handleMarkChange(student.rollNo, e.target.value)}
                   min="0"
                   max={maxMarks}

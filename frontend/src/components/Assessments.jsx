@@ -1,58 +1,65 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../css/Assessments.css"; 
+import "../css/Assessments.css";
 
 const Assessments = () => {
-  const [assignments, setAssignments] = useState(0);
-  const [pdfUpload, setPdfUpload] = useState(false);
-  const [tutorials, setTutorials] = useState(0);
-  const [assessmentsList, setAssessmentsList] = useState([]);
-  const [courseId, setCourseId] = useState(""); 
+  const [assignments, setAssignments] = useState([]);
+  const [assignmentName, setAssignmentName] = useState("");
+  const [assignmentMark, setAssignmentMark] = useState("");
+  const [file, setFile] = useState(null);
+  const [courseId, setCourseId] = useState("");
+  const [overallMark, setOverallMark] = useState(null);
 
   useEffect(() => {
-    
-    const fetchAssessments = async () => {
+    const fetchAssignments = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/api/assessment");
-       
-        setAssessmentsList(response.data);
+        const response = await axios.get("http://localhost:5000/api/assignments");
+        setAssignments(response.data);
+        calculateOverallMark(response.data);
       } catch (error) {
-        console.error("Error fetching assessments:", error);
+        console.error("Error fetching assignments:", error);
       }
     };
-    fetchAssessments();
+    fetchAssignments();
   }, []);
+
+  const calculateOverallMark = (assignments) => {
+    if (assignments.length === 0) return;
+    const marks = assignments.map((a) => a.mark);
+    const avgMark = marks.reduce((acc, mark) => acc + mark, 0) / marks.length;
+    const bestMark = Math.max(...marks);
+    setOverallMark({ average: avgMark.toFixed(2), best: bestMark });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!courseId) {
-      return alert("Course ID is required");
+    if (!courseId || !assignmentName || assignmentMark === "" || !file) {
+      return alert("All fields are required");
     }
 
-    const newAssessment = {
-      numAssignments: assignments,
-      pdfUpload,
-      numTutorials: tutorials,
-      courseId,
-    };
+    const formData = new FormData();
+    formData.append("courseId", courseId);
+    formData.append("assignmentName", assignmentName);
+    formData.append("mark", assignmentMark);
+    formData.append("file", file);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/assessment", newAssessment);
-      console.log(response.data);
-     
-      setAssessmentsList((prevList) => [...prevList, response.data.assessment]);
+      const response = await axios.post("http://localhost:5000/api/assignments", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      setAssignments([...assignments, response.data.assignment]);
+      calculateOverallMark([...assignments, response.data.assignment]);
     } catch (error) {
-      console.error("Error adding assessment:", error);
+      console.error("Error adding assignment:", error);
     }
   };
 
   return (
     <div className="assessments-container">
-      <h2 className="assessments-title">Assessment Details</h2>
+      <h2 className="assessments-title">Assignments</h2>
 
       <form onSubmit={handleSubmit} className="assessments-form">
-        {}
         <div className="form-group">
           <label className="form-label">Course ID:</label>
           <input
@@ -65,67 +72,69 @@ const Assessments = () => {
         </div>
 
         <div className="form-group">
-          <label className="form-label">No. of Assignments:</label>
+          <label className="form-label">Assignment Name:</label>
           <input
-            type="number"
-            value={assignments}
-            onChange={(e) => setAssignments(e.target.value)}
+            type="text"
+            value={assignmentName}
+            onChange={(e) => setAssignmentName(e.target.value)}
             className="form-input"
             required
           />
         </div>
 
         <div className="form-group">
-          <label className="form-label">PDF Upload:</label>
-          <select
-            onChange={(e) => setPdfUpload(e.target.value === "yes")}
+          <label className="form-label">Assignment Mark:</label>
+          <input
+            type="number"
+            value={assignmentMark}
+            onChange={(e) => setAssignmentMark(Number(e.target.value))}
             className="form-input"
-          >
-            <option value="no">No</option>
-            <option value="yes">Yes</option>
-          </select>
+            required
+          />
         </div>
 
         <div className="form-group">
-          <label className="form-label">No. of Tutorials:</label>
+          <label className="form-label">Upload PDF:</label>
           <input
-            type="number"
-            value={tutorials}
-            onChange={(e) => setTutorials(e.target.value)}
+            type="file"
+            accept=".pdf"
+            onChange={(e) => setFile(e.target.files[0])}
             className="form-input"
             required
           />
         </div>
 
         <button type="submit" className="submit-button">
-          Submit
+          Submit Assignment
         </button>
       </form>
 
-      <div className="existing-assessments">
-        <h3 className="existing-assessments-title">Existing Assessments</h3>
-        <ul className="assessments-list">
-          {assessmentsList.length > 0 ? (
-            assessmentsList.map((assessment) => (
-              <li key={assessment._id} className="assessment-item">
-                {}
-                <p>
-                  <strong>Course Code:</strong>{" "}
-                  {assessment.courseId ? assessment.courseId.courseCode : "N/A"}
-                </p>
-                <p><strong>Assignments:</strong> {assessment.numAssignments}</p>
-                <p><strong>PDF Upload:</strong> {assessment.pdfUpload ? "Yes" : "No"}</p>
-                <p><strong>Tutorials:</strong> {assessment.numTutorials}</p>
+      <div className="existing-assignments">
+        <h3 className="existing-assignments-title">Submitted Assignments</h3>
+        <ul className="assignments-list">
+          {assignments.length > 0 ? (
+            assignments.map((assignment) => (
+              <li key={assignment._id} className="assignment-item">
+                <p><strong>Assignment Name:</strong> {assignment.assignmentName}</p>
+                <p><strong>Mark:</strong> {assignment.mark}</p>
+                <p><a href={assignment.fileUrl} target="_blank" rel="noopener noreferrer">View PDF</a></p>
               </li>
             ))
           ) : (
-            <p>No assessments found.</p>
+            <p>No assignments found.</p>
           )}
         </ul>
       </div>
+
+      {overallMark && (
+        <div className="overall-mark">
+          <h3>Overall Mark</h3>
+          <p><strong>Average Mark:</strong> {overallMark.average}</p>
+          <p><strong>Best Mark:</strong> {overallMark.best}</p>
+        </div>
+      )}
     </div>
   );
 };
 
 export default Assessments;
- 

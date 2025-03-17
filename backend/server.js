@@ -8,6 +8,7 @@ const admin = require("firebase-admin");
 const multer = require("multer");
 const pdfParse = require("pdf-parse");
 const XLSX = require("xlsx");
+const { JSDOM } = require("jsdom"); // For parsing HTML
 
 // Import Routes
 const authRoutes = require("./routes/authRoutes");
@@ -18,9 +19,10 @@ const classRoutes = require("./routes/classRoutes");
 const studentRoutes = require("./routes/studentRoutes");
 const markRoutes = require("./routes/marks");
 const tutorialMarksRoutes = require("./routes/tutorialMarks");
+const assignmentMarksRoutes = require("./routes/assignmentMarksRoutes");
 
 // Import Student Model
-const Student = require("./models/Student"); // Ensure you have a Student model
+const Student = require("./models/Student");
 
 const app = express();
 
@@ -29,7 +31,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
-
+app.use("/api", assignmentMarksRoutes);
 // ✅ Initialize Firebase Admin SDK
 if (process.env.FIREBASE_ADMIN_KEY) {
   try {
@@ -73,9 +75,12 @@ app.use("/api/tutorial-marks", tutorialMarksRoutes);
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-/* 📌 1️⃣ API: Upload Marks from Excel or PDF */
+/* 📌 API: Upload Marks from Excel, PDF, or Web Page */
 app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+  if (!req.file) {
+    console.error("❌ No file received");
+    return res.status(400).json({ error: "No file uploaded" });
+  }
 
   const fileType = req.file.mimetype;
   console.log(`📂 Uploaded File Type: ${fileType}`);
@@ -83,7 +88,7 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
   try {
     let extractedMarks = {};
 
-    // 📌 Excel Processing
+    // 📌 Excel Processing (.xlsx, .xls)
     if (fileType.includes("spreadsheet") || fileType.includes("excel")) {
       const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -93,108 +98,66 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
 
       data.forEach((row) => {
         if (row["Roll No"] && row["Marks"]) {
-          const rollNo = row["Roll No"].toString().trim().toLowerCase(); // Normalize roll number
+          const rollNo = row["Roll No"].toString().trim();
           extractedMarks[rollNo] = Number(row["Marks"]);
         }
       });
+
+      return res.json({ marks: extractedMarks });
     }
 
-    // 📌 PDF Processing
-    else if (fileType === "application/pdf") {
-      const pdfData = await pdfParse(req.file.buffer);
-      const text = pdfData.text;
+    // 📌 PDF Processing (.pdf)
+ // 📌 PDF Processing (.pdf)
+if (fileType === "application/pdf") {
+  const pdfText = await pdfParse(req.file.buffer);
+  console.log("📖 Extracted PDF Text:", pdfText.text);
 
-      console.log("📄 Extracted PDF Text:\n", text);
-
-      const lines = text.split("\n").map((line) => line.trim()).filter((line) => line);
-
-      lines.forEach((line) => {
-        const parts = line.split(/\s+/); // Split by spaces
-
-        if (parts.length >= 3) {
-          let rollNo = parts[0].trim().toLowerCase();
-          const marks = parseInt(parts[2], 10); // Extracting the marks
-
-          if (!isNaN(marks)) {
-            extractedMarks[rollNo] = marks;
-          }
-        }
-      });
-
-      console.log("📊 Extracted Marks from PDF:", extractedMarks);
-    } else {
-      return res.status(400).json({ error: "Only Excel and PDF files are supported" });
+  const lines = pdfText.text.split("\n");
+  lines.forEach((line) => {
+    const match = line.match(/(\d+\w+)\s+\w+\s+(\d+)/); // Extract RollNo & Marks
+    if (match) {
+      const rollNo = match[1].trim().toLowerCase(); // Convert to lowercase
+      const marks = Number(match[2]);
+      extractedMarks[rollNo] = marks;
     }
-
-    res.json({ marks: extractedMarks });
-  } catch (error) {
-    console.error("❌ Error Processing File:", error);
-    res.status(500).json({ error: "Error processing file" });
-  }
-});
-app.post("/api/upload-students", upload.single("file"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-  const className = req.body.className;
-  if (!className) return res.status(400).json({ error: "Class name is required" });
-
-  const fileType = req.file.mimetype;
-  console.log(`📂 Uploaded File Type: ${fileType}`);
-
-  try {
-    let extractedStudents = [];
-
-    if (fileType === "application/pdf") {
-      const pdfData = await pdfParse(req.file.buffer);
-      const text = pdfData.text;
-      console.log("📄 Extracted PDF Text:\n", text);
-
-      const lines = text.split("\n").map((line) => line.trim()).filter((line) => line);
-
-      lines.forEach((line) => {
-        const parts = line.split(/\s+/);
-        if (parts.length >= 3) {
-          let rollNo = parts[0].trim().toLowerCase();
-          let name = parts[1].trim();
-          let email = parts[2].trim();
-          if (email.includes("@")) {
-            extractedStudents.push({ rollNo, name, email, className });
-          }
-        }
-      });
-
-      console.log("📊 Extracted Students:", extractedStudents);
-      if (extractedStudents.length > 0) {
-        await Student.insertMany(extractedStudents, { ordered: false }).catch(err => {
-          console.error("⚠️ Some students might already exist:", err);
-        });
-      }
-    }
-
-    res.json({ students: extractedStudents });
-  } catch (error) {
-    console.error("❌ Error Processing File:", error);
-    res.status(500).json({ error: "Error processing file" });
-  }
-});
-
-
-// ✅ Serve Static Files in Production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "client", "build")));
-
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "client", "build", "index.html"));
   });
-} else {
-  app.get("/", (req, res) => {
-    res.send("🚀 API is running");
-  });
+
+  return res.json({ marks: extractedMarks });
 }
 
-// ✅ Global Error Handling
-app.use((err, req, res, next) => {
-  console.error("❌ Global Error:", err.message);
-  res.status(500).json({ error: "Internal Server Error" });
+
+    // 📌 Web Page Processing (.html)
+    if (fileType === "text/html") {
+      const htmlString = req.file.buffer.toString("utf-8");
+      const dom = new JSDOM(htmlString);
+      const document = dom.window.document;
+
+      // Select the table from the webpage
+      const table = document.querySelector("table");
+      if (!table) {
+        return res.status(400).json({ error: "No table found in HTML file" });
+      }
+
+      console.log("📜 Extracted HTML Table:", table.innerHTML);
+
+      const rows = table.querySelectorAll("tr");
+      rows.forEach((row) => {
+        const cells = row.querySelectorAll("td");
+        if (cells.length >= 2) {
+          const rollNo = cells[0].textContent.trim();
+          const marks = Number(cells[1].textContent.trim());
+          extractedMarks[rollNo] = marks;
+        }
+      });
+
+      return res.json({ marks: extractedMarks });
+    }
+
+    return res.status(400).json({ error: "Only Excel, PDF, or HTML files are supported" });
+  } catch (error) {
+    console.error("❌ Error Processing File:", error);
+    res.status(500).json({ error: "Error processing file" });
+  }
 });
 
 // ✅ Start Server

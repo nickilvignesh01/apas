@@ -15,6 +15,7 @@ import Reports from "./components/Reports.jsx";
 import Consolidate from "./components/Consolidate.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import ViewMarks from "./components/ViewMarks.jsx";
+import AssignmentMarks from "./components/AssignmentMarks.jsx"; // ✅ Handles entering & viewing marks
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -31,19 +32,24 @@ const AppContent = () => {
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
 
+        {/* Protected Routes */}
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/courses" element={<PrivateRoute><Courses courses={courses} /></PrivateRoute>} />
         <Route path="/add-course" element={<PrivateRoute><AddNewCourse onAddCourse={handleAddCourse} /></PrivateRoute>} />
         <Route path="/assessments" element={<PrivateRoute><Assessments /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/myclass" element={<PrivateRoute><MyClass /></PrivateRoute>} />
-        <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
         <Route path="/course-menu/:courseId" element={<PrivateRoute><CourseMenu /></PrivateRoute>} />
-        <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
 
-        {/* ✅ Fix: Include `className` in the route path */}
+        {/* Tutorials & Marks Entry */}
+        <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
+        <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
         <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
 
+        {/* ✅ Assignment Marks (Now Includes Enter & View Marks) */}
+        <Route path="/assignment-marks/:courseId" element={<PrivateRoute><AssignmentMarks /></PrivateRoute>} />
+
+        {/* Reports & Consolidation */}
         <Route path="/reports/:courseId" element={<PrivateRoute><Reports /></PrivateRoute>} />
         <Route path="/consolidate/:courseId" element={<PrivateRoute><Consolidate /></PrivateRoute>} />
       </Routes>
@@ -51,12 +57,10 @@ const AppContent = () => {
   );
 };
 
-const App = () => {
-  return (
-    <Router>
-      <AppContent />
-    </Router>
-  );
-};
+const App = () => (
+  <Router>
+    <AppContent />
+  </Router>
+);
 
 export default App;

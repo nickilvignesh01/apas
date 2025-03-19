@@ -17,7 +17,8 @@ import PrivateRoute from "./components/PrivateRoute.jsx";
 import ViewMarks from "./components/ViewMarks.jsx";
 import AssignmentMarks from "./components/AssignmentMarks.jsx"; 
 import Analyse from "./components/analyse.jsx";
-import OverallInternals from "./components/OverallInternals.jsx"
+import OverallInternals from "./components/OverallInternals.jsx";
+import Performance from "./components/Performance.jsx";
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -49,6 +50,7 @@ const AppContent = () => {
         <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
 <Route path="/analyse" element={<Analyse />} />
 <Route path="/OverallInternals" element={<OverallInternals />} />
+<Route path="/Performance" element={<Performance />} />
         {/* ✅ Assignment Marks (Now Includes Enter & View Marks) */}
         <Route path="/assignment-marks/:courseId" element={<PrivateRoute><AssignmentMarks /></PrivateRoute>} />
 

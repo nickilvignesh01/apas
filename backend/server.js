@@ -20,7 +20,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const markRoutes = require("./routes/marks");
 const tutorialMarksRoutes = require("./routes/tutorialMarks");
 const assignmentMarksRoutes = require("./routes/assignmentMarksRoutes");
-
+const overallMarksRoutes = require("./routes/overallMarksRoutes");
 // Import Student Model
 const Student = require("./models/Student");
 
@@ -32,6 +32,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
 app.use("/api", assignmentMarksRoutes);
+app.use("/api/overall-marks", overallMarksRoutes);
 // ✅ Initialize Firebase Admin SDK
 if (process.env.FIREBASE_ADMIN_KEY) {
   try {

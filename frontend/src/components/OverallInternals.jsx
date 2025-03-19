@@ -18,20 +18,15 @@ const OverallInternals = () => {
   }, [courseId]);
 
   // ✅ Function to round CA Marks properly
-  const roundMarks = (marks) => {
-    if (!marks) return 0;
-    return marks >= 12.5 ? Math.ceil(marks) : Math.floor(marks);
-  };
+  const roundMarks = (marks) => (marks >= 12.5 ? Math.ceil(marks) : Math.floor(marks));
 
   // ✅ Fetch Courses
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/course"); // ✅ Matches backend route
-      console.log("✅ Courses fetched:", res.data);
-
+      const res = await axios.get("http://localhost:5000/api/course");
       if (res.data.length > 0) {
         setCourses(res.data);
-        setCourseId(res.data[0]._id); // Auto-select first course
+        setCourseId(res.data[0]._id);
       } else {
         setError("No courses found.");
       }
@@ -41,7 +36,7 @@ const OverallInternals = () => {
     }
   };
 
-  // ✅ Fetch tutorial, assignment, CA-1, and CA-2 marks
+  // ✅ Fetch Marks Data
   const fetchMarksData = async (selectedCourseId) => {
     if (!selectedCourseId) return;
     setLoading(true);
@@ -50,7 +45,7 @@ const OverallInternals = () => {
     try {
       const [tutorialRes, assignmentRes, ca1Res, ca2Res] = await Promise.allSettled([
         axios.get(`http://localhost:5000/api/tutorial-marks/${selectedCourseId}`),
-        axios.get(`http://localhost:5000/api/assignment-marks/${selectedCourseId}/1`), // ✅ Matches `AssignmentMarks.jsx`
+        axios.get(`http://localhost:5000/api/assignment-marks/${selectedCourseId}/1`),
         axios.get("http://localhost:5000/api/assessment/marks", {
           params: { courseId: selectedCourseId, assessmentId: "CA1" },
         }),
@@ -59,9 +54,6 @@ const OverallInternals = () => {
         }),
       ]);
 
-      console.log("✅ API Responses:", { tutorialRes, assignmentRes, ca1Res, ca2Res });
-
-      // ✅ Extract tutorial marks and convert to 15
       const tutorialMarks = {};
       if (tutorialRes.status === "fulfilled") {
         tutorialRes.value.data.forEach((entry) => {
@@ -70,22 +62,16 @@ const OverallInternals = () => {
         });
       }
 
-      // ✅ Convert Tutorial Marks to 15
       const calculateTutorialMarksOutOf15 = (tutorials) => {
         if (!tutorials || tutorials.length === 0) return 0;
-        let totalObtained = 0;
-        let totalMax = 0;
-
+        let totalObtained = 0, totalMax = 0;
         tutorials.forEach(({ marks, maxMarks }) => {
           totalObtained += marks;
           totalMax += maxMarks;
         });
-
-        if (totalMax === 0) return 0; // Prevent division by zero
-        return (totalObtained / totalMax) * 15; // Scale to 15
+        return totalMax === 0 ? 0 : (totalObtained / totalMax) * 15;
       };
 
-      // ✅ Extract assignment marks
       const assignmentMarks = {};
       if (assignmentRes.status === "fulfilled") {
         assignmentRes.value.data.forEach((entry) => {
@@ -93,26 +79,17 @@ const OverallInternals = () => {
         });
       }
 
-      // ✅ Extract CA-1 marks and round to 2 decimal places
-      const ca1Marks = {};
+      const ca1Marks = {}, ca2Marks = {};
       if (ca1Res.status === "fulfilled") {
         ca1Res.value.data.forEach((entry) => {
           ca1Marks[entry.rollNo] = roundMarks(entry.marks);
         });
       }
-
-      // ✅ Extract CA-2 marks and round to 2 decimal places
-      const ca2Marks = {};
       if (ca2Res.status === "fulfilled") {
         ca2Res.value.data.forEach((entry) => {
           ca2Marks[entry.rollNo] = roundMarks(entry.marks);
         });
       }
-
-      // ✅ Calculate CA Total as (CA1 + CA2) / 2
-      const calculateCATotal = (ca1, ca2) => {
-        return ((ca1 + ca2) / 2).toFixed(2);
-      };
 
       // ✅ Combine all students based on roll numbers
       const allStudents = [
@@ -124,33 +101,38 @@ const OverallInternals = () => {
         ]),
       ];
 
-      const studentData = allStudents.map((rollNo) => {
-        const tutorialOutOf15 = calculateTutorialMarksOutOf15(tutorialMarks[rollNo]);
-        const assignmentScore = assignmentMarks[rollNo] || 0;
-        const ca1Score = ca1Marks[rollNo] || 0;
-        const ca2Score = ca2Marks[rollNo] || 0;
-        const caTotal = calculateCATotal(ca1Score, ca2Score);
+      const studentsData = allStudents.map((rollNo) => {
+        const tutorial = calculateTutorialMarksOutOf15(tutorialMarks[rollNo]).toFixed(2);
+        const assignment = assignmentMarks[rollNo] || 0;
+        const ca1 = ca1Marks[rollNo] || 0;
+        const ca2 = ca2Marks[rollNo] || 0;
+        const caTotal = ((ca1 + ca2) / 2).toFixed(2);
 
         return {
           studentName: tutorialRes.status === "fulfilled"
             ? tutorialRes.value.data.find((s) => s.rollNo === rollNo)?.studentName || "N/A"
             : "N/A",
-          rollNo,
-          tutorial: tutorialOutOf15.toFixed(2), // ✅ Now displays tutorial marks out of 15
-          assignment: assignmentScore,
-          ca1: ca1Score, // ✅ Rounded CA1 Marks
-          ca2: ca2Score, // ✅ Rounded CA2 Marks
-          caTotal, // ✅ New CA Total Column
-          total: (tutorialOutOf15 + assignmentScore + parseFloat(caTotal)).toFixed(2), // ✅ Final total
+          rollNo, tutorial, assignment, ca1, ca2, caTotal,
+          total: (parseFloat(tutorial) + assignment + parseFloat(caTotal)).toFixed(2),
         };
       });
 
-      setStudents(studentData);
-    } catch (err) {
-      console.error("❌ Error fetching data:", err);
-      setError("Failed to fetch marks. Please check the server.");
+      setStudents(studentsData);
+      saveTotalMarks(studentsData, selectedCourseId);
+    } catch (error) {
+      console.error("❌ Error fetching marks:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // ✅ Save Total Marks to Backend
+  const saveTotalMarks = async (studentsData, courseId) => {
+    try {
+      await axios.post("http://localhost:5000/api/overall-marks/save", { students: studentsData, courseId });
+      console.log("✅ Total marks saved successfully!");
+    } catch (error) {
+      console.error("❌ Error saving total marks:", error);
     }
   };
 
@@ -183,7 +165,7 @@ const OverallInternals = () => {
                 <th>Assignment</th>
                 <th>CA-1</th>
                 <th>CA-2</th>
-                <th>CA Total</th> {/* ✅ New CA Total Column */}
+                <th>CA Total</th>
                 <th>Total</th>
               </tr>
             </thead>
@@ -196,8 +178,8 @@ const OverallInternals = () => {
                   <td>{student.assignment}</td>
                   <td>{student.ca1}</td>
                   <td>{student.ca2}</td>
-                  <td>{student.caTotal}</td> {/* ✅ Rounded CA Total */}
-                  <td>{student.total}</td> {/* ✅ Final Total */}
+                  <td>{student.caTotal}</td>
+                  <td>{student.total}</td>
                 </tr>
               ))}
             </tbody>

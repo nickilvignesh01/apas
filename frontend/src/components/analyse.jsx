@@ -17,7 +17,7 @@ const Analyse = () => {
             <span>Overall Internals Result</span>
           </Link>
 
-          <Link to="/student-performance" className="action-btn">
+          <Link to="/Performance" className="action-btn">
             <img src="/images/performance.png" alt="Student Performance" className="action-icon" />
             <span>Student Performance</span>
           </Link>

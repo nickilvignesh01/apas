@@ -23,7 +23,7 @@ const Consolidate = () => {
       const marksRes = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
       setMarksData(marksRes.data);
 
-      const courseRes = await axios.get(`http://localhost:5000/api/courses/${courseId}`);
+      const courseRes = await axios.get(`http://localhost:5000/api/course/${courseId}`);
       setCourseName(courseRes.data.courseName);
     } catch (error) {
       console.error("Error fetching marks:", error);
@@ -66,10 +66,29 @@ const Consolidate = () => {
     return studentMarks;
   };
 
+  // ✅ Convert Tutorial Marks to 15
+  const calculateTutorialMarksOutOf15 = (tutorialMarks) => {
+    if (Object.keys(tutorialMarks).length === 0) return 0; // If no tutorial marks, return 0
+
+    let totalObtained = 0;
+    let totalMax = 0;
+
+    Object.values(tutorialMarks).forEach(({ marks, maxMarks }) => {
+      totalObtained += marks;
+      totalMax += maxMarks;
+    });
+
+    if (totalMax === 0) return 0; // Prevent division by zero
+
+    return (totalObtained / totalMax) * 15; // Scale to 15
+  };
+
+  // ✅ Calculate Final Total Marks
   const calculateTotalMarks = (tutorialMarks, assignmentMarks) => {
-    const marksArray = Object.values(tutorialMarks).map((t) => t.marks);
-    let total = marksArray.length === 0 ? 0 : (calculationOption === "best" ? Math.max(...marksArray) : marksArray.reduce((acc, mark) => acc + mark, 0) / marksArray.length);
-    return total + (assignmentMarks !== "N/A" ? assignmentMarks : 0); // ✅ Add assignment marks to total
+    const tutorialOutOf15 = calculateTutorialMarksOutOf15(tutorialMarks);
+    const assignmentScore = assignmentMarks !== "N/A" ? assignmentMarks : 0;
+
+    return tutorialOutOf15 + assignmentScore;
   };
 
   const groupedMarks = groupMarksByStudent();
@@ -81,17 +100,20 @@ const Consolidate = () => {
     const tableData = [];
     const firstStudent = groupedMarks[Object.keys(groupedMarks)[0]];
     const tutorialHeaders = firstStudent ? Object.keys(firstStudent.tutorialMarks).map((tid) => `Tutorial ${tid}`) : [];
-    const tableHeaders = ["Student Name", "Roll Number", ...tutorialHeaders, "Assignment Marks", "Total Marks"];
+    const tableHeaders = ["Student Name", "Roll Number", ...tutorialHeaders, "Tutorial (Out of 15)", "Assignment Marks", "Total Marks"];
 
     Object.keys(groupedMarks).forEach((studentId) => {
       const student = groupedMarks[studentId];
+      const tutorialOutOf15 = calculateTutorialMarksOutOf15(student.tutorialMarks);
       const totalMarks = calculateTotalMarks(student.tutorialMarks, student.assignmentMarks);
+
       const rowData = [
         student.studentName,
         student.rollNo,
         ...tutorialHeaders.map((tid) => `${student.tutorialMarks[tid]?.marks || "N/A"} / ${student.tutorialMarks[tid]?.maxMarks || "N/A"}`),
+        tutorialOutOf15.toFixed(2),
         student.assignmentMarks,
-        totalMarks,
+        totalMarks.toFixed(2),
       ];
       tableData.push(rowData);
     });
@@ -134,6 +156,7 @@ const Consolidate = () => {
                     {Object.keys(groupedMarks[Object.keys(groupedMarks)[0]]?.tutorialMarks || {}).map((tutorialId) => (
                       <th key={tutorialId}>Tutorial {tutorialId}</th>
                     ))}
+                    <th>Tutorial (Out of 15)</th> {/* ✅ Shows scaled tutorial marks */}
                     <th>Assignment Marks</th>
                     <th>Total Marks</th>
                   </tr>
@@ -141,6 +164,7 @@ const Consolidate = () => {
                 <tbody>
                   {Object.keys(groupedMarks).map((studentId) => {
                     const student = groupedMarks[studentId];
+                    const tutorialOutOf15 = calculateTutorialMarksOutOf15(student.tutorialMarks);
                     const totalMarks = calculateTotalMarks(student.tutorialMarks, student.assignmentMarks);
 
                     return (
@@ -151,8 +175,9 @@ const Consolidate = () => {
                           const { marks, maxMarks } = student.tutorialMarks[tutorialId];
                           return <td key={tutorialId}>{marks || "N/A"} / {maxMarks || "N/A"}</td>;
                         })}
+                        <td>{tutorialOutOf15.toFixed(2)}</td> {/* ✅ Converted to 15 */}
                         <td>{student.assignmentMarks}</td>
-                        <td>{totalMarks}</td>
+                        <td>{totalMarks.toFixed(2)}</td> {/* ✅ Final total */}
                       </tr>
                     );
                   })}

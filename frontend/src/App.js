@@ -15,7 +15,9 @@ import Reports from "./components/Reports.jsx";
 import Consolidate from "./components/Consolidate.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";
 import ViewMarks from "./components/ViewMarks.jsx";
-import AssignmentMarks from "./components/AssignmentMarks.jsx"; // ✅ Handles entering & viewing marks
+import AssignmentMarks from "./components/AssignmentMarks.jsx"; 
+import Analyse from "./components/analyse.jsx";
+import OverallInternals from "./components/OverallInternals.jsx"
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -45,7 +47,8 @@ const AppContent = () => {
         <Route path="/tutorials/:courseId" element={<PrivateRoute><Tutorials /></PrivateRoute>} />
         <Route path="/view-marks/:courseId/:tutorialId" element={<PrivateRoute><ViewMarks /></PrivateRoute>} />
         <Route path="/mark-entry/:courseId/:className/:tutorialId/:maxMarks" element={<PrivateRoute><MarkEntry /></PrivateRoute>} />
-
+<Route path="/analyse" element={<Analyse />} />
+<Route path="/OverallInternals" element={<OverallInternals />} />
         {/* ✅ Assignment Marks (Now Includes Enter & View Marks) */}
         <Route path="/assignment-marks/:courseId" element={<PrivateRoute><AssignmentMarks /></PrivateRoute>} />
 

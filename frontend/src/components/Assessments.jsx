@@ -61,7 +61,7 @@ const Assessments = () => {
     }
   };
 
-  // ✅ Fetch Saved Marks
+  // ✅ Fetch Saved Marks (CA Marks are Converted to 20)
   const fetchSavedMarks = async (assessmentId) => {
     try {
       const res = await axios.get("http://localhost:5000/api/assessment/marks", {
@@ -72,7 +72,10 @@ const Assessments = () => {
         const savedMarks = {};
         res.data.forEach((entry) => {
           if (!savedMarks[entry.rollNo]) savedMarks[entry.rollNo] = {};
-          savedMarks[entry.rollNo][assessmentId] = entry.marks;
+          savedMarks[entry.rollNo][assessmentId] = {
+            entered: (entry.marks / 20) * 50, // Convert back to 50 for display
+            converted: entry.marks, // Stored value is out of 20
+          };
         });
 
         setMarks(savedMarks);
@@ -85,6 +88,12 @@ const Assessments = () => {
     }
   };
 
+  // ✅ Convert CA Marks from 50 to 20
+  const convertMarksTo20 = (marks) => {
+    if (!marks || isNaN(marks)) return 0;
+    return (marks / 50) * 20;
+  };
+
   // ✅ Handle Manual Mark Entry
   const handleMarkChange = (rollNo, assessmentId, value) => {
     const enteredMark = Number(value);
@@ -92,16 +101,20 @@ const Assessments = () => {
       alert("Marks cannot exceed 50");
       return;
     }
+
     setMarks((prevMarks) => ({
       ...prevMarks,
       [rollNo]: {
         ...prevMarks[rollNo],
-        [assessmentId]: enteredMark,
+        [assessmentId]: {
+          entered: enteredMark,
+          converted: convertMarksTo20(enteredMark),
+        },
       },
     }));
   };
 
-  // ✅ Save Marks (Manual & Auto-Loaded)
+  // ✅ Save Marks (Only Saves Out of 20)
   const saveMarks = async (assessmentId) => {
     if (!courseId || !selectedClass || !students.length) {
       alert("Missing required data!");
@@ -114,7 +127,7 @@ const Assessments = () => {
       rollNo: student.rollNo,
       studentName: student.name,
       assessmentId,
-      marks: marks[student.rollNo]?.[assessmentId] || 0,
+      marks: marks[student.rollNo]?.[assessmentId]?.converted || 0, // ✅ Save only converted (out of 20)
     }));
 
     try {
@@ -124,40 +137,6 @@ const Assessments = () => {
     } catch (error) {
       console.error("❌ Error saving marks:", error);
       alert(`Error saving marks: ${error.response?.data?.error || error.message}`);
-    }
-  };
-
-  // ✅ Auto Mark Entry - File Upload
-  const handleFileUpload = async (event, assessmentId) => {
-    const file = event.target.files[0];
-    if (!file) return alert("No file selected");
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-
-      if (res.data && res.data.marks) {
-        const updatedMarks = { ...marks };
-        students.forEach((student) => {
-          const normalizedRollNo = student.rollNo.toLowerCase();
-          if (res.data.marks[normalizedRollNo] !== undefined) {
-            if (!updatedMarks[student.rollNo]) updatedMarks[student.rollNo] = {};
-            updatedMarks[student.rollNo][assessmentId] = res.data.marks[normalizedRollNo];
-          }
-        });
-
-        setMarks(updatedMarks);
-        alert("Marks loaded successfully!");
-      } else {
-        alert("Failed to extract marks from the file.");
-      }
-    } catch (error) {
-      console.error("❌ Error processing file:", error.response?.data || error.message);
-      alert("Error processing file.");
     }
   };
 
@@ -212,13 +191,13 @@ const Assessments = () => {
       {showMarksEntry && (
         <div>
           <h3>Enter Marks for {showMarksEntry}</h3>
-          <input type="file" accept=".pdf, .xlsx, .xls" onChange={(e) => handleFileUpload(e, showMarksEntry)} />
           <table>
             <thead>
               <tr>
                 <th>Roll No</th>
                 <th>Student Name</th>
-                <th>Marks (Out of 50)</th>
+                <th>Entered Marks (Out of 50)</th>
+                <th>Converted Marks (Out of 20)</th>
               </tr>
             </thead>
             <tbody>
@@ -227,10 +206,15 @@ const Assessments = () => {
                   <td>{student.rollNo}</td>
                   <td>{student.name}</td>
                   <td>
-                    <input type="number" value={marks[student.rollNo]?.[showMarksEntry] || ""} 
-                      onChange={(e) => handleMarkChange(student.rollNo, showMarksEntry, e.target.value)} 
-                      min="0" max="50" />
+                    <input
+                      type="number"
+                      value={marks[student.rollNo]?.[showMarksEntry]?.entered || ""}
+                      onChange={(e) => handleMarkChange(student.rollNo, showMarksEntry, e.target.value)}
+                      min="0"
+                      max="50"
+                    />
                   </td>
+                  <td>{marks[student.rollNo]?.[showMarksEntry]?.converted?.toFixed(2) || "0.00"}</td>
                 </tr>
               ))}
             </tbody>

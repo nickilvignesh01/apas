@@ -1,8 +1,13 @@
 import { auth } from "../firebase";
 
 export const fetchWithAuth = async (url, options = {}) => {
-  const token = await auth.currentUser.getIdToken(); // Get Firebase token
-
+  const user = auth.currentUser;
+  if (!user) {
+    console.warn("❌ No authenticated user found.");
+    return;
+  }
+  
+  const token = await user.getIdToken(true); // Force refresh token
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,

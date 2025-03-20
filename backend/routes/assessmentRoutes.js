@@ -1,44 +1,50 @@
 const express = require("express");
 const router = express.Router();
-const Assessment = require("../models/Assessment");
+const AssessmentMarks = require("../models/AssessmentMarks");
 
-// POST: Add a new assessment
-router.post("/", async (req, res) => {
+// ✅ POST: Save assessment marks
+router.post("/marks", async (req, res) => {
   try {
-    const { numAssignments, pdfUpload, numTutorials, courseId } = req.body;
-
-    if (!courseId) {
-      return res.status(400).json({ error: "Course ID is required" });
+    const marksData = req.body;
+    if (!Array.isArray(marksData) || marksData.length === 0) {
+      return res.status(400).json({ error: "Invalid or empty marks data" });
     }
 
-    const newAssessment = new Assessment({
-      numAssignments,
-      pdfUpload,
-      numTutorials,
-      courseId,
-    });
+    await Promise.all(
+      marksData.map(async (data) => {
+        await AssessmentMarks.findOneAndUpdate(
+          {
+            courseId: data.courseId,
+            className: data.className,
+            rollNo: data.rollNo,
+            assessmentId: data.assessmentId,
+          },
+          { $set: data },
+          { upsert: true, new: true }
+        );
+      })
+    );
 
-    await newAssessment.save();
-
-    res.status(201).json({
-      message: "Assessment added successfully",
-      assessment: newAssessment,
-    });
+    res.status(201).json({ message: "Marks saved successfully!" });
   } catch (err) {
-    console.error("Error adding assessment:", err);
-    res.status(500).json({ error: "Server error while adding assessment" });
+    console.error("❌ Error saving marks:", err);
+    res.status(500).json({ error: "Server error while saving marks" });
   }
 });
 
-// GET: Fetch all assessments
-router.get("/", async (req, res) => {
+// ✅ GET: Fetch marks for an assessment & course
+router.get("/marks", async (req, res) => {
   try {
-    const assessments = await Assessment.find().populate("courseId", "courseName courseCode");
+    const { courseId, assessmentId } = req.query;
+    if (!courseId || !assessmentId) {
+      return res.status(400).json({ error: "Missing courseId or assessmentId" });
+    }
 
-    res.status(200).json(assessments);
+    const marks = await AssessmentMarks.find({ courseId, assessmentId });
+    res.status(200).json(marks);
   } catch (err) {
-    console.error("Error fetching assessments:", err);
-    res.status(500).json({ error: "Server error while fetching assessments" });
+    console.error("❌ Error fetching marks:", err);
+    res.status(500).json({ error: "Server error while fetching marks" });
   }
 });
 

@@ -54,12 +54,13 @@ router.post("/", upload.single("syllabus"), async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const courses = await Course.find();
-    res.json(courses);
+    res.status(200).json(courses);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch courses" });
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ error: "Server error while fetching courses" });
   }
 });
+
 
 // GET: Get course by ID (including syllabus file path)
 router.get("/:id", async (req, res) => {

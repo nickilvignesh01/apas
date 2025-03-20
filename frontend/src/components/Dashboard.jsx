@@ -39,7 +39,7 @@ const Dashboard = () => {
             {[
               { name: "courses", icon: "/images/courses.png" },
               { name: "assessments", icon: "/images/assess.png" },
-              { name: "reports", icon: "/images/report.png" },
+              { name: "analyse", icon: "/images/report.png" },
               { name: "profile", icon: "/images/profile.png" },
               { name: "MyClass", icon: "/images/help.png" },
             ].map((item, index) => (

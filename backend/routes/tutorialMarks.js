@@ -95,6 +95,33 @@ router.get("/:courseId", async (req, res) => {
   }
 });
 
+
+
+
+
+// 📌 Delete All Tutorials & Marks for a Course (DELETE /api/tutorial-marks/:courseId)
+router.delete("/:courseId", async (req, res) => {
+  const { courseId } = req.params;
+
+  try {
+    // Delete tutorial marks first
+    const marksResult = await Mark.deleteMany({ courseId });
+    
+    // Delete completed tutorial records
+    const completedResult = await CompletedTutorial.deleteMany({ courseId });
+
+    // If nothing was deleted, return 404
+    if (marksResult.deletedCount === 0 && completedResult.deletedCount === 0) {
+      return res.status(404).json({ error: "No tutorials found to delete" });
+    }
+
+    res.json({ message: "All tutorials and related data deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting tutorials:", error);
+    res.status(500).json({ error: "Failed to delete tutorials" });
+  }
+});
+
 // 📌 Get All Students for a Course (GET /api/students/:courseId)
 router.get("/students/:courseId", async (req, res) => {
   const { courseId } = req.params;

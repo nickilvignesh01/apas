@@ -45,6 +45,29 @@ select:focus {
   border-color: #007bff;
   outline: none;
 }
+/* Styling for the View Marks Link */
+.view-btn {
+  
+  padding: 12px 18px;
+  background-color: #5a0855; /* Blue color */
+  color: white;
+  text-align: center;
+  font-size: 1rem;
+  text-decoration: none; /* Removes underline */
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  max-width: 250px;
+  margin-left:40px;
+}
+
+
+/* Active State */
+.view-btn:active {
+  background-color: #003366; /* Even darker blue when clicked */
+  transform: scale(1); /* Reset scale on click */
+}
 
 /* Tutorial Input Area */
 .tutorial-input {

@@ -16,14 +16,26 @@ const MarkEntry = () => {
   }, [courseId, className, tutorialId]);
 
   // Fetch Students
-  const fetchStudents = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/students?className=${className}`);
-      setStudents(res.data);
-    } catch (error) {
-      console.error("Error fetching students:", error);
-    }
-  };
+// Fetch Students
+// Fetch Students
+const fetchStudents = async () => {
+  try {
+    const res = await axios.get(`http://localhost:5000/api/students?className=${className}`);
+    
+    // Sort students by roll number
+    const sortedStudents = res.data.sort((a, b) => {
+      const rollNoA = a.rollNo.replace(/[^\d]/g, ''); // Remove non-numeric characters
+      const rollNoB = b.rollNo.replace(/[^\d]/g, ''); // Remove non-numeric characters
+      return Number(rollNoA) - Number(rollNoB); // Compare numeric part of roll numbers
+    });
+    
+    setStudents(sortedStudents);
+  } catch (error) {
+    console.error("Error fetching students:", error);
+  }
+};
+
+
 
   // Fetch Saved Marks
   const fetchSavedMarks = async () => {
@@ -69,11 +81,19 @@ const MarkEntry = () => {
 
         // Ensure extracted marks are properly mapped to student roll numbers
         const updatedMarks = {};
-        students.forEach((student) => {
-          if (res.data.marks[student.rollNo] !== undefined) {
-            updatedMarks[student.rollNo] = res.data.marks[student.rollNo];
-          }
-        });
+       if (students.length === 0) {
+  alert("Student list not loaded yet. Please wait and try again.");
+  return;
+}
+
+students.forEach((student) => {
+ const studentRoll = student.rollNo.toLowerCase();
+if (res.data.marks[studentRoll] !== undefined) {
+  updatedMarks[student.rollNo] = res.data.marks[studentRoll];
+}
+
+});
+
 
         setMarks(updatedMarks); // ✅ Marks now update UI correctly
         console.log("📌 Updated Marks:", updatedMarks);

@@ -13,6 +13,9 @@ const Consolidate = () => {
   const [loading, setLoading] = useState(true);
   const [calculationOption, setCalculationOption] = useState("average");
 
+  const [selectedClass, setSelectedClass] = useState("All");
+  const [availableClasses, setAvailableClasses] = useState([]);
+
   useEffect(() => {
     fetchMarks();
     fetchAssignmentMarks();
@@ -23,6 +26,12 @@ const Consolidate = () => {
       const marksRes = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
       setMarksData(marksRes.data);
 
+      // 🔻 Extract unique class names
+     const classes = [...new Set(marksRes.data.map((entry) => entry.className))];
+console.log("Classes extracted:", classes); // 👈 Add this
+setAvailableClasses(classes);
+
+
       const courseRes = await axios.get(`http://localhost:5000/api/course/${courseId}`);
       setCourseName(courseRes.data.courseName);
     } catch (error) {
@@ -32,10 +41,9 @@ const Consolidate = () => {
     }
   };
 
-  // ✅ Fetch saved assignment marks from API
   const fetchAssignmentMarks = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`); // Fetch for Assignment 1
+      const res = await axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`);
       const assignmentMarksData = {};
       res.data.forEach((entry) => {
         assignmentMarksData[entry.rollNo] = entry.marks;
@@ -47,7 +55,11 @@ const Consolidate = () => {
   };
 
   const groupMarksByStudent = () => {
-    const studentMarks = marksData.reduce((groups, mark) => {
+    const filtered = selectedClass === "All"
+      ? marksData
+      : marksData.filter((entry) => entry.className === selectedClass);
+
+    const studentMarks = filtered.reduce((groups, mark) => {
       const { studentName, rollNo, tutorialId, marks, maxMarks } = mark;
 
       if (!groups[rollNo]) {
@@ -55,7 +67,7 @@ const Consolidate = () => {
           studentName,
           rollNo,
           tutorialMarks: {},
-          assignmentMarks: assignmentMarks[rollNo] || "N/A", // ✅ Use fetched assignment marks
+          assignmentMarks: assignmentMarks[rollNo] || "N/A",
         };
       }
 
@@ -66,9 +78,8 @@ const Consolidate = () => {
     return studentMarks;
   };
 
-  // ✅ Convert Tutorial Marks to 15
   const calculateTutorialMarksOutOf15 = (tutorialMarks) => {
-    if (Object.keys(tutorialMarks).length === 0) return 0; // If no tutorial marks, return 0
+    if (Object.keys(tutorialMarks).length === 0) return 0;
 
     let totalObtained = 0;
     let totalMax = 0;
@@ -78,12 +89,11 @@ const Consolidate = () => {
       totalMax += maxMarks;
     });
 
-    if (totalMax === 0) return 0; // Prevent division by zero
+    if (totalMax === 0) return 0;
 
-    return (totalObtained / totalMax) * 15; // Scale to 15
+    return (totalObtained / totalMax) * 15;
   };
 
-  // ✅ Calculate Final Total Marks
   const calculateTotalMarks = (tutorialMarks, assignmentMarks) => {
     const tutorialOutOf15 = calculateTutorialMarksOutOf15(tutorialMarks);
     const assignmentScore = assignmentMarks !== "N/A" ? assignmentMarks : 0;
@@ -95,7 +105,7 @@ const Consolidate = () => {
 
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text(`Consolidated Report: ${courseName}`, 14, 10);
+    doc.text(`Consolidated Report: ${courseName}${selectedClass !== "All" ? ` (Class: ${selectedClass})` : ""}`, 14, 10);
 
     const tableData = [];
     const firstStudent = groupedMarks[Object.keys(groupedMarks)[0]];
@@ -124,12 +134,27 @@ const Consolidate = () => {
       startY: 20,
     });
 
-    doc.save(`Consolidated_Report_${courseName}.pdf`);
+    doc.save(`Consolidated_Report_${courseName}_${selectedClass}.pdf`);
   };
 
   return (
     <div className="reports-container">
       <h2>Consolidated Report: {courseName}</h2>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <label>Select Class: </label>
+        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
+          <option value="All">All</option>
+          {availableClasses
+  .filter((cls) => typeof cls === "string")
+  .map((cls) => (
+    <option key={cls} value={cls}>
+      {cls.toUpperCase()}
+    </option>
+))}
+
+        </select>
+      </div>
 
       <div>
         <label>
@@ -156,7 +181,7 @@ const Consolidate = () => {
                     {Object.keys(groupedMarks[Object.keys(groupedMarks)[0]]?.tutorialMarks || {}).map((tutorialId) => (
                       <th key={tutorialId}>Tutorial {tutorialId}</th>
                     ))}
-                    <th>Tutorial (Out of 15)</th> {/* ✅ Shows scaled tutorial marks */}
+                    <th>Tutorial (Out of 15)</th>
                     <th>Assignment Marks</th>
                     <th>Total Marks</th>
                   </tr>
@@ -175,9 +200,9 @@ const Consolidate = () => {
                           const { marks, maxMarks } = student.tutorialMarks[tutorialId];
                           return <td key={tutorialId}>{marks || "N/A"} / {maxMarks || "N/A"}</td>;
                         })}
-                        <td>{tutorialOutOf15.toFixed(2)}</td> {/* ✅ Converted to 15 */}
+                        <td>{tutorialOutOf15.toFixed(2)}</td>
                         <td>{student.assignmentMarks}</td>
-                        <td>{totalMarks.toFixed(2)}</td> {/* ✅ Final total */}
+                        <td>{totalMarks.toFixed(2)}</td>
                       </tr>
                     );
                   })}
@@ -189,7 +214,7 @@ const Consolidate = () => {
               </div>
             </>
           ) : (
-            <p>No data available for this course.</p>
+            <p>No data available for this course/class.</p>
           )}
         </div>
       )}

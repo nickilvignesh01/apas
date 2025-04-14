@@ -168,32 +168,43 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
       console.log("📊 Extracted Excel Data:", data);
 
       data.forEach((row) => {
-        if (row["Roll No"] && row["Marks"]) {
-          const rollNo = row["Roll No"].toString().trim();
-          extractedMarks[rollNo] = Number(row["Marks"]);
-        }
-      });
+  const rollNo = row["ROLL NO"]?.toString().trim().toLowerCase();
+  const marks = row["MARKS (out of 15)"];
+
+  if (rollNo && !isNaN(marks)) {
+    extractedMarks[rollNo] = Number(marks);
+  }
+});
+
 
       return res.json({ marks: extractedMarks });
     }
 
     // 📌 PDF Processing (.pdf)
     if (fileType === "application/pdf") {
-      const pdfText = await pdfParse(req.file.buffer);
-      console.log("📖 Extracted PDF Text:", pdfText.text);
+  const pdfText = await pdfParse(req.file.buffer);
+  console.log("📖 Extracted PDF Text:", pdfText.text);
 
-      const lines = pdfText.text.split("\n");
-      lines.forEach((line) => {
-        const match = line.match(/(\d+\w+)\s+\w+\s+(\d+)/);
-        if (match) {
-          const rollNo = match[1].trim().toLowerCase();
-          const marks = Number(match[2]);
-          extractedMarks[rollNo] = marks;
-        }
-      });
+  const lines = pdfText.text.split("\n");
 
-      return res.json({ marks: extractedMarks });
+  lines.forEach((line) => {
+    const cleaned = line.trim().replace(/\s+/g, " ");
+    const parts = cleaned.split(" ");
+    
+    if (parts.length >= 3) {
+      const rollNo = parts[0].toLowerCase();
+      const marks = Number(parts[parts.length - 1]);
+
+      if (!isNaN(marks)) {
+        extractedMarks[rollNo] = marks;
+      }
     }
+  });
+
+  console.log("✅ Extracted Marks:", extractedMarks);
+  return res.json({ marks: extractedMarks });
+}
+
 
     return res.status(400).json({ error: "Only Excel, PDF, or HTML files are supported" });
   } catch (error) {

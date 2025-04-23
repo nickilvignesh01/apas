@@ -19,6 +19,8 @@ import AssignmentMarks from "./components/AssignmentMarks.jsx";
 import Analyse from "./components/analyse.jsx";
 import OverallInternals from "./components/OverallInternals.jsx";
 import Performance from "./components/Performance.jsx";
+import IndividualReport from "./components/IndividualReport.jsx";
+import SendMail from "./components/SendMail.jsx";
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -53,6 +55,12 @@ const AppContent = () => {
 <Route path="/Performance" element={<Performance />} />
         {/* ✅ Assignment Marks (Now Includes Enter & View Marks) */}
         <Route path="/assignment-marks/:courseId" element={<PrivateRoute><AssignmentMarks /></PrivateRoute>} />
+       <Route path="/individual-report" element={<IndividualReport />} />
+<Route path="/send-mail" element={<SendMail />} />
+
+
+
+
 
         {/* Reports & Consolidation */}
         <Route path="/reports/:courseId" element={<PrivateRoute><Reports /></PrivateRoute>} />

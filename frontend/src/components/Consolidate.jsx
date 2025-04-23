@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import "../css/Reports.css"; // Ensure the CSS file is correctly linked
+import "../css/Reports.css";
 
 const Consolidate = () => {
   const { courseId } = useParams();
@@ -11,121 +11,142 @@ const Consolidate = () => {
   const [courseName, setCourseName] = useState("");
   const [assignmentMarks, setAssignmentMarks] = useState({});
   const [loading, setLoading] = useState(true);
-  const [calculationOption, setCalculationOption] = useState("average");
-
   const [selectedClass, setSelectedClass] = useState("All");
   const [availableClasses, setAvailableClasses] = useState([]);
+  const [error, setError] = useState(null);
+  const [sortOrder, setSortOrder] = useState("rollNo"); // 'rollNo', 'asc', 'desc'
 
   useEffect(() => {
-    fetchMarks();
-    fetchAssignmentMarks();
+    fetchData();
   }, [courseId]);
 
-  const fetchMarks = async () => {
+  const fetchData = async () => {
     try {
-      const marksRes = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
+      setLoading(true);
+      setError(null);
+
+      const [marksRes, courseRes, classesRes, assignmentRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
+        axios.get(`http://localhost:5000/api/course/${courseId}`),
+        axios.get(`http://localhost:5000/api/classes`),
+        axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`),
+      ]);
+
       setMarksData(marksRes.data);
-
-      // 🔻 Extract unique class names
-     const classes = [...new Set(marksRes.data.map((entry) => entry.className))];
-console.log("Classes extracted:", classes); // 👈 Add this
-setAvailableClasses(classes);
-
-
-      const courseRes = await axios.get(`http://localhost:5000/api/course/${courseId}`);
-      setCourseName(courseRes.data.courseName);
+      setCourseName(courseRes.data.courseName || "Unknown Course");
+      setAvailableClasses(classesRes.data.map((cls) => cls.name.toLowerCase()));
+      const assignmentMap = {};
+      assignmentRes.data.forEach((entry) => {
+        assignmentMap[entry.rollNo] = entry.marks;
+      });
+      setAssignmentMarks(assignmentMap);
     } catch (error) {
-      console.error("Error fetching marks:", error);
+      console.error("Error fetching data:", error);
+      setError("Failed to fetch data. Please check the server and try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchAssignmentMarks = async () => {
-    try {
-      const res = await axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`);
-      const assignmentMarksData = {};
-      res.data.forEach((entry) => {
-        assignmentMarksData[entry.rollNo] = entry.marks;
-      });
-      setAssignmentMarks(assignmentMarksData);
-    } catch (error) {
-      console.error("Error fetching assignment marks:", error);
-    }
+  const extractNumericRoll = (rollNo) => {
+    const match = rollNo.match(/\d+$/);
+    return match ? parseInt(match[0]) : 0;
   };
 
   const groupMarksByStudent = () => {
-    const filtered = selectedClass === "All"
-      ? marksData
-      : marksData.filter((entry) => entry.className === selectedClass);
+    const selected = selectedClass.trim().toLowerCase();
+
+    const filtered =
+      selected === "all"
+        ? marksData
+        : marksData.filter((entry) => (entry.className?.trim().toLowerCase() || "unknown") === selected);
 
     const studentMarks = filtered.reduce((groups, mark) => {
       const { studentName, rollNo, tutorialId, marks, maxMarks } = mark;
+      if (!rollNo || !tutorialId) return groups;
 
       if (!groups[rollNo]) {
         groups[rollNo] = {
-          studentName,
+          studentName: studentName || rollNo,
           rollNo,
           tutorialMarks: {},
-          assignmentMarks: assignmentMarks[rollNo] || "N/A",
+          assignmentMarks: assignmentMarks?.[rollNo] || "N/A",
         };
       }
 
-      groups[rollNo].tutorialMarks[tutorialId] = { marks, maxMarks };
+      groups[rollNo].tutorialMarks[tutorialId] = {
+        marks: marks ?? 0,
+        maxMarks: maxMarks ?? 0,
+      };
       return groups;
     }, {});
 
-    return studentMarks;
+    let grouped = Object.values(studentMarks);
+
+    // Sort based on selected option
+    if (sortOrder === "asc" || sortOrder === "desc") {
+      grouped.sort((a, b) => {
+        const totalA = calculateTotalMarks(a.tutorialMarks, a.assignmentMarks);
+        const totalB = calculateTotalMarks(b.tutorialMarks, b.assignmentMarks);
+        return sortOrder === "asc" ? totalA - totalB : totalB - totalA;
+      });
+    } else {
+      grouped.sort((a, b) => extractNumericRoll(a.rollNo) - extractNumericRoll(b.rollNo));
+    }
+
+    return grouped;
   };
 
   const calculateTutorialMarksOutOf15 = (tutorialMarks) => {
-    if (Object.keys(tutorialMarks).length === 0) return 0;
-
     let totalObtained = 0;
     let totalMax = 0;
 
     Object.values(tutorialMarks).forEach(({ marks, maxMarks }) => {
-      totalObtained += marks;
-      totalMax += maxMarks;
+      totalObtained += marks || 0;
+      totalMax += maxMarks || 0;
     });
 
-    if (totalMax === 0) return 0;
-
-    return (totalObtained / totalMax) * 15;
+    return totalMax === 0 ? 0 : (totalObtained / totalMax) * 15;
   };
 
-  const calculateTotalMarks = (tutorialMarks, assignmentMarks) => {
+  const calculateTotalMarks = (tutorialMarks, assignmentMark) => {
     const tutorialOutOf15 = calculateTutorialMarksOutOf15(tutorialMarks);
-    const assignmentScore = assignmentMarks !== "N/A" ? assignmentMarks : 0;
-
+    const assignmentScore = assignmentMark !== "N/A" ? parseFloat(assignmentMark) : 0;
     return tutorialOutOf15 + assignmentScore;
   };
 
-  const groupedMarks = groupMarksByStudent();
-
   const exportPDF = () => {
+    const groupedMarks = groupMarksByStudent();
     const doc = new jsPDF();
-    doc.text(`Consolidated Report: ${courseName}${selectedClass !== "All" ? ` (Class: ${selectedClass})` : ""}`, 14, 10);
+    doc.text(
+      `Consolidated Report: ${courseName}${selectedClass !== "All" ? ` (Class: ${selectedClass.toUpperCase()})` : ""}`,
+      14,
+      10
+    );
 
     const tableData = [];
-    const firstStudent = groupedMarks[Object.keys(groupedMarks)[0]];
-    const tutorialHeaders = firstStudent ? Object.keys(firstStudent.tutorialMarks).map((tid) => `Tutorial ${tid}`) : [];
-    const tableHeaders = ["Student Name", "Roll Number", ...tutorialHeaders, "Tutorial (Out of 15)", "Assignment Marks", "Total Marks"];
+    const firstStudent = groupedMarks[0];
+    const tutorialHeaders = firstStudent
+      ? Object.keys(firstStudent.tutorialMarks).map((tid) => `Tutorial ${tid}`)
+      : [];
+    const tableHeaders = ["Student Name", "Roll No", ...tutorialHeaders, "Tutorial (Out of 15)", "Assignment", "Total"];
 
-    Object.keys(groupedMarks).forEach((studentId) => {
-      const student = groupedMarks[studentId];
+    groupedMarks.forEach((student) => {
       const tutorialOutOf15 = calculateTutorialMarksOutOf15(student.tutorialMarks);
       const totalMarks = calculateTotalMarks(student.tutorialMarks, student.assignmentMarks);
 
-      const rowData = [
+      const row = [
         student.studentName,
         student.rollNo,
-        ...tutorialHeaders.map((tid) => `${student.tutorialMarks[tid]?.marks || "N/A"} / ${student.tutorialMarks[tid]?.maxMarks || "N/A"}`),
+        ...tutorialHeaders.map(
+          (tid) => `${student.tutorialMarks[tid]?.marks ?? "N/A"} / ${student.tutorialMarks[tid]?.maxMarks ?? "N/A"}`
+        ),
         tutorialOutOf15.toFixed(2),
         student.assignmentMarks,
         totalMarks.toFixed(2),
       ];
-      tableData.push(rowData);
+
+      tableData.push(row);
     });
 
     autoTable(doc, {
@@ -137,86 +158,83 @@ setAvailableClasses(classes);
     doc.save(`Consolidated_Report_${courseName}_${selectedClass}.pdf`);
   };
 
+  const groupedMarks = groupMarksByStudent();
+
   return (
     <div className="reports-container">
-      <h2>Consolidated Report: {courseName}</h2>
+      <h2>Consolidated Report: {courseName || "Loading..."}</h2>
 
       <div style={{ marginBottom: "1rem" }}>
         <label>Select Class: </label>
         <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
           <option value="All">All</option>
-          {availableClasses
-  .filter((cls) => typeof cls === "string")
-  .map((cls) => (
-    <option key={cls} value={cls}>
-      {cls.toUpperCase()}
-    </option>
-))}
-
+          {availableClasses.map((cls) => (
+            <option key={cls} value={cls}>
+              {cls.toUpperCase()}
+            </option>
+          ))}
         </select>
-      </div>
 
-      <div>
-        <label>
-          <input type="radio" value="average" checked={calculationOption === "average"} onChange={() => setCalculationOption("average")} />
-          Average of all marks
-        </label>
-        <label>
-          <input type="radio" value="best" checked={calculationOption === "best"} onChange={() => setCalculationOption("best")} />
-          Best of all marks
-        </label>
+        <label style={{ marginLeft: "1rem" }}>Sort By: </label>
+        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="rollNo">Roll No</option>
+          <option value="asc">Marks: Low to High</option>
+          <option value="desc">Marks: High to Low</option>
+        </select>
       </div>
 
       {loading ? (
         <p>Loading data...</p>
-      ) : (
-        <div>
-          {Object.keys(groupedMarks).length > 0 ? (
-            <>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Student Name</th>
-                    <th>Roll Number</th>
-                    {Object.keys(groupedMarks[Object.keys(groupedMarks)[0]]?.tutorialMarks || {}).map((tutorialId) => (
-                      <th key={tutorialId}>Tutorial {tutorialId}</th>
-                    ))}
-                    <th>Tutorial (Out of 15)</th>
-                    <th>Assignment Marks</th>
-                    <th>Total Marks</th>
+      ) : error ? (
+        <p style={{ color: "red" }}>{error}</p>
+      ) : groupedMarks.length > 0 ? (
+        <>
+          <table>
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Roll No</th>
+                {Object.keys(groupedMarks[0]?.tutorialMarks || {}).map((tutorialId) => (
+                  <th key={tutorialId}>Tutorial {tutorialId}</th>
+                ))}
+                <th>Tutorial (Out of 15)</th>
+                <th>Assignment</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedMarks.map((student) => {
+                const tutorialOutOf15 = calculateTutorialMarksOutOf15(student.tutorialMarks);
+                const total = calculateTotalMarks(student.tutorialMarks, student.assignmentMarks);
+
+                return (
+                  <tr key={student.rollNo}>
+                    <td>{student.studentName}</td>
+                    <td>{student.rollNo}</td>
+                    {Object.keys(student.tutorialMarks).map((tid) => {
+                      const { marks, maxMarks } = student.tutorialMarks[tid];
+                      return (
+                        <td key={tid}>
+                          {marks ?? "N/A"} / {maxMarks ?? "N/A"}
+                        </td>
+                      );
+                    })}
+                    <td>{tutorialOutOf15.toFixed(2)}</td>
+                    <td>{student.assignmentMarks}</td>
+                    <td>{total.toFixed(2)}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {Object.keys(groupedMarks).map((studentId) => {
-                    const student = groupedMarks[studentId];
-                    const tutorialOutOf15 = calculateTutorialMarksOutOf15(student.tutorialMarks);
-                    const totalMarks = calculateTotalMarks(student.tutorialMarks, student.assignmentMarks);
-
-                    return (
-                      <tr key={studentId}>
-                        <td>{student.studentName}</td>
-                        <td>{student.rollNo}</td>
-                        {Object.keys(student.tutorialMarks).map((tutorialId) => {
-                          const { marks, maxMarks } = student.tutorialMarks[tutorialId];
-                          return <td key={tutorialId}>{marks || "N/A"} / {maxMarks || "N/A"}</td>;
-                        })}
-                        <td>{tutorialOutOf15.toFixed(2)}</td>
-                        <td>{student.assignmentMarks}</td>
-                        <td>{totalMarks.toFixed(2)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              <div className="button-container">
-                <button onClick={exportPDF} className="export-btn">Export as PDF</button>
-              </div>
-            </>
-          ) : (
-            <p>No data available for this course/class.</p>
-          )}
-        </div>
+                );
+              })}
+            </tbody>
+          </table>
+          <div className="button-container">
+            <button className="export-btn" onClick={exportPDF}>
+              Export as PDF
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>No data available for the selected class: {selectedClass.toUpperCase()}.</p>
       )}
     </div>
   );

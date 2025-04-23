@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Mark = require("../models/Mark");
 const CompletedTutorial = require("../models/CompletedTutorial");
-const Student = require("../models/Student"); // Ensure Student model is imported
+const Student = require("../models/Student");
 
 // 📌 Save Marks for a Tutorial (POST /api/tutorial-marks)
 router.post("/", async (req, res) => {
@@ -11,8 +11,11 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "Invalid data format. Expected an array." });
     }
 
-    // Save marks for each student
+    // Validate and save marks for each student
     const markPromises = req.body.map(async (mark) => {
+      if (!mark.courseId || !mark.tutorialId || !mark.className || !mark.rollNo || mark.marks == null || mark.maxMarks == null) {
+        throw new Error(`Invalid mark entry: ${JSON.stringify(mark)}`);
+      }
       return Mark.create({
         courseId: mark.courseId,
         tutorialId: mark.tutorialId,
@@ -36,9 +39,7 @@ router.post("/complete-tutorial", async (req, res) => {
   const { courseId, tutorialId } = req.body;
 
   try {
-    // Save the completed tutorial in CompletedTutorial model
     await CompletedTutorial.create({ courseId, tutorialId });
-
     res.status(200).json({ message: "Tutorial marked as completed" });
   } catch (error) {
     console.error("Error marking tutorial as completed:", error);
@@ -62,32 +63,35 @@ router.get("/completed/:courseId", async (req, res) => {
 router.get("/:courseId", async (req, res) => {
   const { courseId } = req.params;
   try {
-    console.log("Fetching marks for course:", courseId); // Log courseId for debugging
+    console.log("Fetching marks for course:", courseId);
 
     // Fetch all marks for the given course
-    const marks = await Mark.find({ courseId }).populate("courseId", "courseName");
+    const marks = await Mark.find({ courseId }).lean();
+    console.log("Raw marks data:", marks.slice(0, 3)); // Log sample for debugging
 
     // Fetch student names based on roll numbers
-    const studentRollNumbers = marks.map(mark => mark.rollNo);
-    console.log("Student roll numbers:", studentRollNumbers); // Log student roll numbers for debugging
+    const studentRollNumbers = marks.map((mark) => mark.rollNo);
+    console.log("Student roll numbers:", studentRollNumbers);
 
-    const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name");
+    const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name").lean();
 
     // Create a mapping of rollNo to studentName
     const studentMap = {};
-    students.forEach(student => {
+    students.forEach((student) => {
       studentMap[student.rollNo] = student.name;
     });
 
-    // Attach student names to marks data
-    const marksWithStudentNames = marks.map(mark => ({
+    // Include all required fields, including className
+    const marksWithStudentNames = marks.map((mark) => ({
       tutorialId: mark.tutorialId,
+      className: mark.className, // Include className
       rollNo: mark.rollNo,
-      studentName: studentMap[mark.rollNo] || "Unknown", // Default if name is missing
+      studentName: studentMap[mark.rollNo] || "Unknown",
       marks: mark.marks,
-      maxMarks: mark.maxMarks
+      maxMarks: mark.maxMarks,
     }));
 
+    console.log("Processed marks (sample):", marksWithStudentNames.slice(0, 3));
     res.json(marksWithStudentNames);
   } catch (error) {
     console.error("Error fetching marks:", error);
@@ -95,22 +99,14 @@ router.get("/:courseId", async (req, res) => {
   }
 });
 
-
-
-
-
 // 📌 Delete All Tutorials & Marks for a Course (DELETE /api/tutorial-marks/:courseId)
 router.delete("/:courseId", async (req, res) => {
   const { courseId } = req.params;
 
   try {
-    // Delete tutorial marks first
     const marksResult = await Mark.deleteMany({ courseId });
-    
-    // Delete completed tutorial records
     const completedResult = await CompletedTutorial.deleteMany({ courseId });
 
-    // If nothing was deleted, return 404
     if (marksResult.deletedCount === 0 && completedResult.deletedCount === 0) {
       return res.status(404).json({ error: "No tutorials found to delete" });
     }
@@ -126,7 +122,6 @@ router.delete("/:courseId", async (req, res) => {
 router.get("/students/:courseId", async (req, res) => {
   const { courseId } = req.params;
   try {
-    // Fetch all students for the course (with all necessary details)
     const students = await Student.find({ courseId }, "_id name rollNo");
     res.json(students);
   } catch (error) {
@@ -139,27 +134,24 @@ router.get("/students/:courseId", async (req, res) => {
 router.get("/:courseId/:tutorialId", async (req, res) => {
   const { courseId, tutorialId } = req.params;
   try {
-    // Fetch marks based on courseId and tutorialId
-    const marks = await Mark.find({ courseId, tutorialId });
+    const marks = await Mark.find({ courseId, tutorialId }).lean();
 
-    // Fetch student names based on roll numbers
-    const studentRollNumbers = marks.map(mark => mark.rollNo);
-    console.log("Student roll numbers:", studentRollNumbers);  // Log student roll numbers for debugging
+    const studentRollNumbers = marks.map((mark) => mark.rollNo);
+    console.log("Student roll numbers:", studentRollNumbers);
 
-    const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name");
+    const students = await Student.find({ rollNo: { $in: studentRollNumbers } }, "rollNo name").lean();
 
-    // Create a mapping of rollNo to studentName
     const studentMap = {};
-    students.forEach(student => {
+    students.forEach((student) => {
       studentMap[student.rollNo] = student.name;
     });
 
-    // Attach student names to marks data
-    const marksWithStudentNames = marks.map(mark => ({
+    const marksWithStudentNames = marks.map((mark) => ({
+      className: mark.className, // Include className
       rollNo: mark.rollNo,
-      studentName: studentMap[mark.rollNo] || "Unknown", // Default if name is missing
+      studentName: studentMap[mark.rollNo] || "Unknown",
       marks: mark.marks,
-      maxMarks: mark.maxMarks
+      maxMarks: mark.maxMarks,
     }));
 
     res.json(marksWithStudentNames);

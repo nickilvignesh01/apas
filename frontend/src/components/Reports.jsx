@@ -7,32 +7,72 @@ const Reports = () => {
   const { courseId } = useParams();
   const [marksData, setMarksData] = useState([]);
   const [courseName, setCourseName] = useState("");
+  const [availableClasses, setAvailableClasses] = useState([]);
+  const [selectedClass, setSelectedClass] = useState("All");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchMarks();
+    fetchData();
   }, [courseId]);
 
-  // Fetch course name and marks for the course
-  const fetchMarks = async () => {
+  // Fetch course name, classes, and marks for the course
+  const fetchData = async () => {
     try {
-      // Fetch marks data for the course
-      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
-      setMarksData(res.data);
+      setLoading(true);
+      setError(null);
 
-      // Fetch course name using the courseId (modify the API call as needed)
-      const courseRes = await axios.get(`http://localhost:5000/api/courses/${courseId}`);
-      setCourseName(courseRes.data.courseName);
+      // Fetch marks, course, and classes concurrently
+      const [marksRes, courseRes, classesRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
+        axios.get(`http://localhost:5000/api/course/${courseId}`), // Adjusted to match your API
+        axios.get(`http://localhost:5000/api/classes`),
+      ]);
+
+      console.log("Tutorial Marks Response (Sample):", JSON.stringify(marksRes.data.slice(0, 3), null, 2));
+      console.log("Classes Response:", JSON.stringify(classesRes.data, null, 2));
+      console.log("Course Response:", courseRes.data);
+
+      setMarksData(marksRes.data);
+      setCourseName(courseRes.data.courseName || "Unknown Course");
+      setAvailableClasses(classesRes.data.map((cls) => cls.name.toLowerCase()));
     } catch (error) {
-      console.error("Error fetching marks:", error);
+      console.error("Error fetching data:", error);
+      setError("Failed to fetch data. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Group marks by tutorialId
+  // Group marks by tutorialId, filtered by selected class
   const groupMarksByTutorial = () => {
-    return marksData.reduce((groups, mark) => {
+    console.log("Marks Data Sample:", JSON.stringify(marksData.slice(0, 3), null, 2));
+    console.log("Selected Class:", selectedClass);
+
+    if (!marksData || marksData.length === 0) {
+      console.warn("No marks data available.");
+      return {};
+    }
+
+    const selected = selectedClass.trim().toLowerCase();
+
+    // Filter marks by className
+    const filtered =
+      selected === "all"
+        ? marksData
+        : marksData.filter((entry) => {
+            const entryClass = entry.className?.trim().toLowerCase() || "unknown";
+            console.log("Comparing:", entryClass, selected);
+            return entryClass === selected;
+          });
+
+    if (filtered.length === 0) {
+      console.warn("No data matched for selected class:", selectedClass);
+      return {};
+    }
+
+    // Group filtered marks by tutorialId
+    return filtered.reduce((groups, mark) => {
       const { tutorialId } = mark;
       if (!groups[tutorialId]) {
         groups[tutorialId] = [];
@@ -46,40 +86,54 @@ const Reports = () => {
 
   return (
     <div className="reports-container">
-      <h2>Reports card</h2>
+      <h2>Reports Card: {courseName || "Loading..."}</h2>
+
+      <div style={{ marginBottom: "1rem" }}>
+        <label>Select Class: </label>
+        <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
+          <option value="All">All</option>
+          {availableClasses.map((cls) => (
+            <option key={cls} value={cls}>
+              {cls.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
-        <p>Loading marks...</p>
-      ) : (
+        <p>Loading data...</p>
+      ) : error ? (
+        <p style={{ color: "red" }}>{error}</p>
+      ) : Object.keys(groupedMarks).length > 0 ? (
         <>
-          {Object.keys(groupedMarks).length > 0 ? (
-            Object.keys(groupedMarks).map((tutorialId) => (
-              <div key={tutorialId} className="tutorial-group">
-                <h3>Tutorial {tutorialId}</h3>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Student Name</th>
-                      <th>Marks</th>
-                      <th>Max Marks</th>
+          {Object.keys(groupedMarks).map((tutorialId) => (
+            <div key={tutorialId} className="tutorial-group">
+              <h3>Tutorial {tutorialId}</h3>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Student Name</th>
+                    <th>Roll No</th>
+                    <th>Marks</th>
+                    <th>Max Marks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {groupedMarks[tutorialId].map((mark, index) => (
+                    <tr key={index}>
+                      <td>{mark.studentName || mark.rollNo}</td>
+                      <td>{mark.rollNo}</td>
+                      <td>{mark.marks ?? "N/A"}</td>
+                      <td>{mark.maxMarks ?? "N/A"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {groupedMarks[tutorialId].map((mark, index) => (
-                      <tr key={index}>
-                        <td>{mark.studentName}</td>
-                        <td>{mark.marks}</td>
-                        <td>{mark.maxMarks}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ))
-          ) : (
-            <p>No marks available for this course.</p>
-          )}
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
         </>
+      ) : (
+        <p>No marks available for the selected class: {selectedClass.toUpperCase()}.</p>
       )}
     </div>
   );

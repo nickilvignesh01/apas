@@ -17,6 +17,7 @@ router.post("/save", async (req, res) => {
       courseId,
       rollNo: student.rollNo,
       studentName: student.studentName,
+      className: student.className || "unknown", // Map className with fallback
       tutorial: student.tutorial,
       assignment: student.assignment,
       ca1: student.ca1,
@@ -25,13 +26,12 @@ router.post("/save", async (req, res) => {
       total: student.total,
     }));
 
-    // ✅ Remove old data for this course (to avoid duplicates)
+    // ✅ Remove old data for this course
     await OverallMarks.deleteMany({ courseId });
 
     // ✅ Insert new data
     await OverallMarks.insertMany(marksData);
     res.json({ message: "Marks saved successfully!" });
-
   } catch (error) {
     console.error("❌ Error saving marks:", error);
     res.status(500).json({ error: "Server error while saving marks" });
@@ -42,7 +42,7 @@ router.post("/save", async (req, res) => {
 router.get("/:courseId", async (req, res) => {
   try {
     const { courseId } = req.params;
-    const marks = await OverallMarks.find({ courseId });
+    const marks = await OverallMarks.find({ courseId }).lean();
 
     if (!marks.length) {
       return res.status(404).json({ error: "No marks found for this course" });

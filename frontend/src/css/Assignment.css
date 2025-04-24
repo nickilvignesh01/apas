@@ -1,0 +1,235 @@
+/* General Container Styles */
+.assignment-marks-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9fbfc;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 1000px;
+  margin: 20px auto;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading Style */
+h2 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+/* Label Styling */
+label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Input and Select Styling */
+input[type="number"],
+select {
+  font-size: 1rem;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  width: 100%;
+  max-width: 300px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input[type="number"]:focus,
+select:focus {
+  border-color: #5a0855;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  outline: none;
+}
+
+/* File Upload Button */
+.upload-marks-btn {
+  display: inline-block;
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background-color: #805ad5; /* Purple for upload */
+  color: white;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  min-width: 150px;
+}
+
+.upload-marks-btn:hover {
+  background-color: #6b46c1; /* Darker purple */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.upload-marks-btn:active {
+  transform: translateY(0);
+}
+
+.upload-marks-btn input[type="file"] {
+  display: none;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+/* General Button Styling */
+button {
+  font-size: 1rem;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+  display: inline-block;
+  min-width: 150px;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:disabled {
+  background-color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+/* Set Max Marks Button */
+.set-max-marks-btn {
+  background-color: #01542e; /* Blue */
+  color: white;
+}
+
+.set-max-marks-btn:hover {
+  background-color: #610468; /* Darker blue */
+}
+
+/* Enter Marks Button */
+.enter-marks-btn {
+  background-color: #48bb78; /* Green */
+  color: white;
+}
+
+.enter-marks-btn:hover {
+  background-color: #38a169; /* Darker green */
+}
+
+/* Edit Marks Button */
+.edit-marks-btn {
+  background-color: #ed8936; /* Orange */
+  color: white;
+}
+
+.edit-marks-btn:hover {
+  background-color: #dd6b20; /* Darker orange */
+}
+
+/* View Marks Button */
+.view-marks-btn {
+  background-color: #5a0855; /* Purple */
+  color: white;
+}
+
+.view-marks-btn:hover {
+  background-color: #460643; /* Darker purple */
+}
+
+/* Save Marks Button */
+.save-marks-btn {
+  background-color: #2f855a; /* Teal */
+  color: white;
+}
+
+.save-marks-btn:hover {
+  background-color: #276749; /* Darker teal */
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+th,
+td {
+  padding: 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+  background-color: #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+td input[type="number"] {
+  width: 100px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+}
+
+td input[type="number"]:disabled {
+  background-color: #f7fafc;
+  cursor: not-allowed;
+}
+
+
+@media (max-width: 768px) {
+  .assignment-marks-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button,
+  .upload-marks-btn {
+    width: 100%;
+  }
+
+  input[type="number"],
+  select {
+    max-width: none;
+  }
+
+  table {
+    font-size: 0.9rem;
+  }
+
+  td input[type="number"] {
+    width: 80px;
+  }
+}

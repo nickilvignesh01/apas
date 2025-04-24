@@ -201,13 +201,23 @@ app.post("/api/upload-marks", upload.single("file"), async (req, res) => {
 
       data.forEach((row) => {
         const rollNo = row["ROLL NO"]?.toString().trim().toLowerCase();
-        const marks = row["MARKS (out of 15)"];
+        // Look for any column containing "MARKS" (case-insensitive)
+        const marksKey = Object.keys(row).find((key) =>
+          key.toLowerCase().includes("marks")
+        );
+        const marks = marksKey ? row[marksKey] : null;
 
         if (rollNo && !isNaN(marks)) {
           extractedMarks[rollNo] = Number(marks);
         }
       });
 
+      if (Object.keys(extractedMarks).length === 0) {
+        console.error("❌ No valid marks extracted from Excel");
+        return res.status(400).json({ error: "No valid marks found in the file" });
+      }
+
+      console.log("✅ Extracted Marks:", extractedMarks);
       return res.json({ marks: extractedMarks });
     }
 
@@ -287,7 +297,7 @@ app.post("/api/send-email", upload.single("pdf"), async (req, res) => {
       from: `"psg(test mail)" <${process.env.EMAIL_USER}>`,
       to: emailId,
       subject: `Performance Report for ${studentName} (${rollNo})`,
-      text: `Dear ${studentName},\n\nAttached is your performance report. To pass the course, you need to score at least ${targetMainMark}/100 in the main exam (including a safety buffer of 10 marks).\n\nBest regards,\n staff `,
+      text: `Dear ${studentName},\n\nAttached is your performance report. To pass the course, you need to score at least ${targetMainMark}/100 in the main exam (including a safety buffer of 10 marks).\n\nBest regards,\n staffz`,
       attachments: [
         {
           filename: `Individual_Report_${rollNo}.pdf`,

@@ -2,7 +2,6 @@ import React from "react";
 import "../css/CourseMenu.css"; 
 import { Link } from "react-router-dom";
 
-
 const Analyse = () => {
   return (
     <div className="analyse-container">
@@ -23,13 +22,9 @@ const Analyse = () => {
           </Link>
 
           <Link to="/individual-report" className="action-btn">
-                    <img
-                      src="/images/report.png"
-                      alt="Individual Report"
-                      className="action-icon"
-                    />
-                    <span>View Individual Student Report</span>
-                  </Link>
+            <img src="/images/ind.png" alt="Individual Report" className="action-icon" />
+            <span>View Individual Student Report</span>
+          </Link>
 
           <Link to="/send-mail" className="action-btn">
             <img src="/images/mail.png" alt="Send Mail" className="action-icon" />

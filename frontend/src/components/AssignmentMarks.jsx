@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import "../css/Tutorials.css";
+import "../css/Assignment.css";
 
 const AssignmentMarks = () => {
   const { courseId } = useParams();
@@ -20,6 +20,16 @@ const AssignmentMarks = () => {
   useEffect(() => {
     fetchClasses();
     fetchCourseDetails();
+
+    // Cleanup on unmount
+    return () => {
+      setMarks({});
+      setStudents([]);
+      setIsEditing(false);
+      setIsMarksSaved(false);
+      setMaxMarks(null);
+      setIsMaxMarksSet(false);
+    };
   }, [courseId]);
 
   const fetchCourseDetails = async () => {
@@ -64,15 +74,19 @@ const AssignmentMarks = () => {
   const fetchSavedMarks = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/${assignment.id}`);
+      console.log("fetchSavedMarks response:", res.data); // Debug log
       if (res.data && Array.isArray(res.data)) {
         const savedMarks = {};
         res.data.forEach((entry) => {
-          savedMarks[entry.rollNo] = entry.marks;
+          if (entry.rollNo && entry.marks !== undefined) {
+            savedMarks[entry.rollNo] = entry.marks;
+          }
         });
         setMarks(savedMarks);
         setIsMarksSaved(true);
         setIsEditing(false);
       } else {
+        console.warn("fetchSavedMarks: Response is not an array:", res.data);
         setMarks({});
       }
     } catch (error) {
@@ -92,6 +106,7 @@ const AssignmentMarks = () => {
       const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("handleFileUpload response:", res.data); // Debug log
 
       if (res.data && res.data.marks) {
         const updatedMarks = {};
@@ -124,10 +139,12 @@ const AssignmentMarks = () => {
       assignmentId: assignment.id,
       marks: marks[student.rollNo] || 0,
       maxMarks,
+      studentName: student.name, // Added to match model
     }));
 
     try {
-      await axios.post("http://localhost:5000/api/assignment-marks", requestData);
+      const res = await axios.post("http://localhost:5000/api/assignment-marks", requestData);
+      console.log("saveMarks response:", res.data); // Debug log
       setIsMarksSaved(true);
       setIsEditing(false);
       alert("Marks saved successfully!");
@@ -154,62 +171,79 @@ const AssignmentMarks = () => {
         onChange={(e) => setMaxMarks(Number(e.target.value))}
         min="1"
       />
-      <button onClick={() => setIsMaxMarksSet(true)}>Set Max Marks</button>
+      <button className="set-max-marks-btn" onClick={() => setIsMaxMarksSet(true)}>
+        Set Max Marks
+      </button>
 
       <label>Upload Marks (PDF/Excel):</label>
-      <input type="file" accept=".xlsx, .xls, .pdf" onChange={handleFileUpload} />
+      <label className="upload-marks-btn">
+        Upload Marks
+        <input type="file" accept=".xlsx, .xls, .pdf" onChange={handleFileUpload} />
+      </label>
 
-      {!isMarksSaved ? (
-        <button onClick={fetchStudents}>Enter Marks</button>
-      ) : (
-        <button onClick={() => setIsEditing(true)}>Edit Marks</button>
-      )}
+      <div className="action-buttons">
+        {!isMarksSaved ? (
+          <button className="enter-marks-btn" onClick={fetchStudents}>
+            Enter Marks
+          </button>
+        ) : (
+          <button className="edit-marks-btn" onClick={() => setIsEditing(true)}>
+            Edit Marks
+          </button>
+        )}
+        <button className="view-marks-btn" onClick={fetchSavedMarks}>
+          View Marks
+        </button>
+        <button className="save-marks-btn" onClick={saveMarks} disabled={!isEditing}>
+          Save Marks
+        </button>
+      </div>
 
-      <button onClick={fetchSavedMarks}>View Marks</button>
-
-      <table>
-        <thead>
-          <tr>
-            <th>Roll No</th>
-            <th>Student Name</th>
-            <th>Marks</th>
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student) => (
-            <tr key={student.rollNo}>
-              <td>{student.rollNo}</td>
-              <td>{student.name}</td>
-              <td>
-                <input
-                  type="number"
-                  value={marks[student.rollNo] !== undefined ? marks[student.rollNo] : ""}
-                  onChange={(e) => {
-                    if (!isEditing) return; // Prevent editing if not in edit mode
-                    let enteredMarks = Number(e.target.value);
-
-                    if (!isMaxMarksSet || maxMarks === null) {
-                      alert("Please set Max Marks first!");
-                      return;
-                    }
-
-                    if (!isNaN(enteredMarks) && enteredMarks >= 0 && enteredMarks <= maxMarks) {
-                      setMarks({ ...marks, [student.rollNo]: enteredMarks });
-                    } else {
-                      alert(`Please enter marks between 0 and ${maxMarks}`);
-                    }
-                  }}
-                  min="0"
-                  max={maxMarks || ""}
-                  disabled={!isEditing} // Disable input if not in edit mode
-                />
-              </td>
+      {students.length > 0 ? (
+        <table>
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Student Name</th>
+              <th>Marks</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {students.map((student) => (
+              <tr key={student.rollNo}>
+                <td>{student.rollNo}</td>
+                <td>{student.name}</td>
+                <td>
+                  <input
+                    type="number"
+                    value={marks[student.rollNo] !== undefined ? marks[student.rollNo] : ""}
+                    onChange={(e) => {
+                      if (!isEditing) return;
+                      let enteredMarks = Number(e.target.value);
 
-      <button onClick={saveMarks} disabled={!isEditing}>Save Marks</button>
+                      if (!isMaxMarksSet || maxMarks === null) {
+                        alert("Please set Max Marks first!");
+                        return;
+                      }
+
+                      if (!isNaN(enteredMarks) && enteredMarks >= 0 && enteredMarks <= maxMarks) {
+                        setMarks({ ...marks, [student.rollNo]: enteredMarks });
+                      } else {
+                        alert(`Please enter marks between 0 and ${maxMarks}`);
+                      }
+                    }}
+                    min="0"
+                    max={maxMarks || ""}
+                    disabled={!isEditing}
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No students loaded. Select a class and click "Enter Marks" to begin.</p>
+      )}
     </div>
   );
 };

@@ -1,0 +1,501 @@
+/* Performance.css - Enhanced UI for Student Performance Analysis */
+
+/* CSS Variables for Theme Consistency */
+:root {
+  --primary-purple: #49025b;
+  --secondary-purple: #6b0280;
+  --hover-purple: #7b0394;
+  --text-gray: #6b7280;
+  --border-gray: #d1d5db;
+  --bg-light: #f9fafb;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --grade-a-bg: #d1fae5;
+  --grade-a-text: #047857;
+  --grade-b-bg: #e0f2fe;
+  --grade-b-text: #0369a1;
+  --grade-c-bg: #fef3c7;
+  --grade-c-text: #92400e;
+  --grade-d-bg: #fee2e2;
+  --grade-d-text: #b91c1c;
+}
+
+/* Base Styles */
+.performance-container {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  background-color: #f9f7ff;
+  color: #333;
+  min-height: 100vh;
+}
+
+/* Header Styles */
+.header-container {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 15px rgba(73, 2, 91, 0.15);
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.header-container:hover {
+  transform: translateY(-3px);
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.page-title svg {
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.page-subtitle {
+  opacity: 0.9;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+/* Card Styles */
+.card {
+  background-color: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 10px var(--shadow-color);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 15px rgba(73, 2, 91, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Section Titles */
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary-purple);
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(73, 2, 91, 0.1);
+}
+
+.section-title svg {
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.student-count {
+  font-size: 0.9rem;
+  color: var(--text-gray);
+  margin-left: 0.5rem;
+  font-weight: normal;
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: #4b5563;
+}
+
+.form-select,
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: #4b5563;
+  background-color: var(--bg-light);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--primary-purple);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(73, 2, 91, 0.15);
+}
+
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 0.7rem;
+  color: var(--primary-purple);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn svg {
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-primary {
+  color: white;
+  background-color: var(--primary-purple);
+}
+
+.btn-primary:hover {
+  background-color: var(--hover-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(73, 2, 91, 0.25);
+}
+
+.btn-secondary {
+  color: white;
+  background-color: var(--secondary-purple);
+}
+
+.btn-secondary:hover {
+  background-color: var(--hover-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(107, 2, 128, 0.25);
+}
+
+/* Grid Layout */
+.grid {
+  display: grid;
+}
+
+.grid-cols-1 {
+  grid-template-columns: 1fr;
+}
+
+.md:grid-cols-2 {
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.md:grid-cols-3 {
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+/* Flexbox Utilities */
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.md:flex-row {
+  @media (min-width: 768px) {
+    flex-direction: row;
+  }
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.items-center {
+  align-items: center;
+}
+
+/* Tables */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background-color: #f9f7ff;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.data-table thead {
+  background-color: #f0e6ff;
+}
+
+.data-table th {
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: white;
+  font-size: 0.875rem;
+  text-align: left;
+}
+
+.data-table td {
+  padding: 0.75rem 1rem;
+  color: #4b5563;
+  border-top: 1px solid #f3ebff;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f0e6ff;
+}
+
+/* Grades */
+.grade {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.grade-a {
+  background-color: var(--grade-a-bg);
+  color: var(--grade-a-text);
+}
+
+.grade-b {
+  background-color: var(--grade-b-bg);
+  color: var(--grade-b-text);
+}
+
+.grade-c {
+  background-color: var(--grade-c-bg);
+  color: var(--grade-c-text);
+}
+
+.grade-d {
+  background-color: var(--grade-d-bg);
+  color: var(--grade-d-text);
+}
+
+/* Top Performer Highlighting */
+.top-performer {
+  background-color: #f3e8ff;
+}
+
+/* Chart Container */
+.chart-container {
+  width: 100%;
+  height: 300px;
+  position: relative;
+  margin: 1rem 0;
+}
+
+/* Recharts Styling */
+.recharts-default-tooltip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid var(--border-gray) !important;
+  border-radius: 8px !important;
+  padding: 10px !important;
+}
+
+.recharts-legend-item-text {
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(73, 2, 91, 0.1);
+  border-left-color: var(--primary-purple);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error Message */
+.error-message {
+  background-color: #fee2e2;
+  border-left: 4px solid #ef4444;
+  color: #b91c1c;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.error-message svg {
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Empty State */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-gray);
+}
+
+.empty-state svg {
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  max-width: 400px;
+}
+
+/* Animations */
+.fade-in {
+  animation: fadeIn 0.5s ease-in;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f9f7ff;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--secondary-purple);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--hover-purple);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .performance-container {
+    padding: 1rem;
+  }
+
+  .header-container {
+    padding: 1.25rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+  }
+
+  .card {
+    padding: 1.25rem;
+  }
+
+  .btn {
+    padding: 0.625rem 1.25rem;
+  }
+
+  .chart-container {
+    height: 250px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .slide-in,
+  .scale-in,
+  .spinner {
+    animation: none;
+  }
+}

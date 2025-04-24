@@ -1,118 +1,244 @@
-/* General Styles */
-.assessments-container {
-    max-width: 800px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.5s ease-in-out;
+/* General Container Styles */
+.assessment-marks-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f9fbfc;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 1200px; /* Increased to accommodate wider tables */
+  margin: 20px auto;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading Style */
+h2 {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+h3 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #2d3748;
+  margin: 20px 0;
+}
+
+/* Label Styling */
+label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #4a5568;
+  margin-bottom: 8px;
+  display: block;
+}
+
+/* Selector Styling */
+.selector {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+select {
+  font-size: 1rem;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background-color: #fff;
+  width: 100%;
+  max-width: 300px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+select:focus {
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+  outline: none;
+}
+
+select:disabled {
+  background-color: #edf2f7;
+  cursor: not-allowed;
+}
+
+/* Assessment Table */
+.assessment-table {
+  width: 100%;
+  max-width: 800px; /* Increased from 600px to make the table wider */
+  margin: 20px auto;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.assessment-table th,
+.assessment-table td {
+  padding: 14px; /* Slightly increased padding for better spacing */
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.assessment-table th {
+  background-color: #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.assessment-table td {
+  color: #4a5568;
+}
+
+/* Action Buttons */
+.action-buttons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+button {
+  font-size: 1rem;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* View Marks Button */
+.action-buttons button:first-child {
+  background-color: #5a0855;
+  color: white;
+}
+
+.action-buttons button:first-child:hover {
+  background-color: #4a0744;
+}
+
+/* Enter/Edit Marks Button */
+.action-buttons button:last-child {
+  background-color: #4a024b; /* Restored to blue for consistency */
+  color: white;
+}
+
+.action-buttons button:last-child:hover {
+  background-color: #074a02;
+}
+
+
+
+.marks-entry table,
+.marks-table table {
+  width: 100%;
+  max-width: 1000px; /* Increased to make entry/view tables wider */
+  margin: 0 auto;
+  border-collapse: collapse;
+}
+
+.marks-entry th,
+.marks-entry td,
+.marks-table th,
+.marks-table td {
+  padding: 14px; /* Increased padding for better readability */
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.marks-entry th,
+.marks-table th {
+  background-color: #edf2f7;
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.marks-entry td,
+.marks-table td {
+  color: #4a5568;
+}
+
+.marks-entry input {
+  font-size: 1rem;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  width: 120px; /* Slightly increased for wider tables */
+  transition: border-color 0.3s ease;
+}
+
+.marks-entry input:focus {
+  border-color: #3182ce;
+  outline: none;
+}
+
+/* Save Marks Button */
+.save-marks-btn {
+  background-color: #48bb78; /* Changed to green for consistency */
+  color: white;
+  margin-top: 20px;
+  padding: 12px 24px;
+  width: 100%;
+  max-width: 200px;
+}
+
+.save-marks-btn:hover {
+  background-color: #38a169;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .assessment-marks-container {
+    padding: 20px;
+    margin: 10px;
+    max-width: 100%; /* Ensure container uses full width on mobile */
   }
-  
-  .assessments-title {
-    font-size: 2rem;
-    color: #460343;
-    text-align: center;
-    margin-bottom: 1.5rem;
-    font-weight: bold;
+
+  h2 {
+    font-size: 1.8rem;
   }
-  
-  .assessments-form {
-    display: flex;
+
+  .selector select {
+    max-width: none;
+  }
+
+  .assessment-table {
+    max-width: 100%; /* Full width on mobile */
+  }
+
+  .marks-entry table,
+  .marks-table table {
+    max-width: 100%; /* Full width on mobile */
+    font-size: 0.9rem;
+  }
+
+  .action-buttons {
     flex-direction: column;
-    gap: 1.5rem;
+    align-items: stretch;
   }
-  
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
+
+  .action-buttons button {
+    width: 100%;
   }
-  
-  .form-label {
-    font-size: 1rem;
-    color: #460343;
-    font-weight: 600;
+
+  .marks-entry input {
+    width: 80px; /* Reduced for mobile */
   }
-  
-  .form-input {
-    padding: 0.75rem;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+
+  .marks-entry th,
+  .marks-entry td,
+  .marks-table th,
+  .marks-table td {
+    padding: 10px; /* Reduced padding for mobile */
   }
-  
-  .form-input:focus {
-    border-color: #460343;
-    box-shadow: 0 0 8px rgba(70, 3, 67, 0.3);
-    outline: none;
-  }
-  
-  .submit-button {
-    background-color: #460343;
-    color: white;
-    padding: 0.75rem;
-    border: none;
-    border-radius: 5px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-  }
-  
-  .submit-button:hover {
-    background-color: #5a0456;
-    transform: translateY(-2px);
-  }
-  
-  .submit-button:active {
-    transform: translateY(0);
-  }
-  
-  /* Existing Assessments Section */
-  .existing-assessments {
-    margin-top: 2rem;
-  }
-  
-  .existing-assessments-title {
-    font-size: 1.5rem;
-    color: #460343;
-    margin-bottom: 1rem;
-    font-weight: bold;
-  }
-  
-  .assessments-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .assessment-item {
-    background: #f9f9f9;
-    padding: 1rem;
-    border-radius: 5px;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  
-  .assessment-item:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  }
-  
-  .assessment-item p {
-    margin: 0.5rem 0;
-    color: #333;
-  }
-  
-  /* Animations */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
+}

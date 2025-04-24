@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const AssessmentMarks = require("../models/AssessmentMarks");
 
-// ✅ POST: Save assessment marks
+
 router.post("/marks", async (req, res) => {
   try {
     const marksData = req.body;

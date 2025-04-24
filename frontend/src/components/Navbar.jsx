@@ -23,8 +23,8 @@ const Navbar = () => {
       <ul className="nav-links">
         <li><Link to="/dashboard">Dashboard</Link></li>
         <li><Link to="/courses">Courses</Link></li>
-        <li><Link to="/assessments"> assessments </Link></li>
-        <li><Link to="/analyse">analyse</Link></li>
+        <li><Link to="/assessments">Assessments</Link></li>
+        <li><Link to="/analyse">Analyse</Link></li>
         <li><Link to="/help">Help</Link></li>
       </ul>
 
@@ -41,10 +41,7 @@ const Navbar = () => {
               <FaQuestionCircle className="dropdown-icon" />
               Help
             </Link>
-            <Link to="/feedback">
-              <FaCommentDots className="dropdown-icon" />
-              Feedback
-            </Link>
+            
             <Link to="/contact-us">
               <FaPhoneAlt className="dropdown-icon" />
               Contact Us

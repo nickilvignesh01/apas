@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import "../css/Assessments.css";
 
 const Assessments = () => {
   const { courseId: paramCourseId } = useParams();
@@ -13,6 +14,7 @@ const Assessments = () => {
   const [showMarksEntry, setShowMarksEntry] = useState(null);
   const [showMarksTable, setShowMarksTable] = useState(null);
   const [isMarksSaved, setIsMarksSaved] = useState({ CA1: false, CA2: false });
+  const [fileError, setFileError] = useState("");
 
   useEffect(() => {
     fetchCourses();
@@ -26,42 +28,48 @@ const Assessments = () => {
     if (selectedClass) fetchStudents();
   }, [selectedClass]);
 
-  // ✅ Fetch Courses
+  // Fetch Courses
   const fetchCourses = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/course");
       setCourses(res.data);
-      if (res.data.length > 0) setCourseId(res.data[0]._id);
+      if (res.data.length > 0 && !courseId) setCourseId(res.data[0]._id);
     } catch (error) {
-      console.error("❌ Error fetching courses:", error);
+      console.error("Error fetching courses:", error);
       alert("Failed to load courses. Check the server.");
     }
   };
 
-  // ✅ Fetch Classes
+  // Fetch Classes
   const fetchClasses = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/classes?courseId=${courseId}`);
       setClasses(res.data);
       if (res.data.length > 0) setSelectedClass(res.data[0].name);
     } catch (error) {
-      console.error("❌ Error fetching classes:", error);
+      console.error("Error fetching classes:", error);
     }
   };
 
-  // ✅ Fetch Students
+  // Fetch Students
   const fetchStudents = async () => {
     if (!selectedClass) return;
     try {
       const res = await axios.get(`http://localhost:5000/api/students?className=${selectedClass}`);
-      setStudents(res.data);
+      // Sort students by roll number
+      const sortedStudents = res.data.sort((a, b) => {
+        const rollNoA = a.rollNo.replace(/[^\d]/g, '');
+        const rollNoB = b.rollNo.replace(/[^\d]/g, '');
+        return Number(rollNoA) - Number(rollNoB);
+      });
+      setStudents(sortedStudents);
     } catch (error) {
-      console.error("❌ Error fetching students:", error);
+      console.error("Error fetching students:", error);
       alert("Failed to fetch students.");
     }
   };
 
-  // ✅ Fetch Saved Marks (CA Marks are Converted to 20)
+  // Fetch Saved Marks
   const fetchSavedMarks = async (assessmentId) => {
     try {
       const res = await axios.get("http://localhost:5000/api/assessment/marks", {
@@ -73,28 +81,29 @@ const Assessments = () => {
         res.data.forEach((entry) => {
           if (!savedMarks[entry.rollNo]) savedMarks[entry.rollNo] = {};
           savedMarks[entry.rollNo][assessmentId] = {
-            entered: (entry.marks / 20) * 50, // Convert back to 50 for display
-            converted: entry.marks, // Stored value is out of 20
+            entered: (entry.marks / 20) * 50,
+            converted: entry.marks,
           };
         });
 
         setMarks(savedMarks);
         setIsMarksSaved((prev) => ({ ...prev, [assessmentId]: true }));
         setShowMarksTable(assessmentId);
+        setShowMarksEntry(null);
       }
     } catch (error) {
-      console.error("❌ Error fetching saved marks:", error);
+      console.error("Error fetching saved marks:", error);
       alert("Error fetching marks. Please try again.");
     }
   };
 
-  // ✅ Convert CA Marks from 50 to 20
+  // Convert Marks from 50 to 20
   const convertMarksTo20 = (marks) => {
     if (!marks || isNaN(marks)) return 0;
     return (marks / 50) * 20;
   };
 
-  // ✅ Handle Manual Mark Entry
+  // Handle Manual Mark Entry
   const handleMarkChange = (rollNo, assessmentId, value) => {
     const enteredMark = Number(value);
     if (enteredMark > 50) {
@@ -114,7 +123,7 @@ const Assessments = () => {
     }));
   };
 
-  // ✅ Save Marks (Only Saves Out of 20)
+  // Save Marks
   const saveMarks = async (assessmentId) => {
     if (!courseId || !selectedClass || !students.length) {
       alert("Missing required data!");
@@ -127,16 +136,79 @@ const Assessments = () => {
       rollNo: student.rollNo,
       studentName: student.name,
       assessmentId,
-      marks: marks[student.rollNo]?.[assessmentId]?.converted || 0, // ✅ Save only converted (out of 20)
+      marks: marks[student.rollNo]?.[assessmentId]?.converted || 0,
     }));
 
     try {
       await axios.post("http://localhost:5000/api/assessment/marks", requestData);
       setIsMarksSaved((prev) => ({ ...prev, [assessmentId]: true }));
+      setShowMarksEntry(null);
       alert(`Marks for ${assessmentId} saved successfully!`);
     } catch (error) {
-      console.error("❌ Error saving marks:", error);
+      console.error("Error saving marks:", error);
       alert(`Error saving marks: ${error.response?.data?.error || error.message}`);
+    }
+  };
+
+  // Handle File Upload
+  const handleFileUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setFileError("");
+
+    if (students.length === 0) {
+      setFileError("Student list not loaded yet. Please wait and try again.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (res.data && res.data.marks) {
+        console.log("📊 Extracted Marks from File:", res.data.marks);
+
+        const newMarks = {};
+        let hasErrors = false;
+
+        students.forEach((student) => {
+          const studentRoll = student.rollNo.toLowerCase();
+          if (res.data.marks[studentRoll] !== undefined) {
+            const enteredMark = Number(res.data.marks[studentRoll]);
+            if (enteredMark > 50) {
+              hasErrors = true;
+              return;
+            }
+            newMarks[student.rollNo] = {
+              CA1: { entered: enteredMark, converted: convertMarksTo20(enteredMark) },
+              CA2: { entered: enteredMark, converted: convertMarksTo20(enteredMark) },
+            };
+          }
+        });
+
+        if (hasErrors) {
+          setFileError("Some marks exceed 50. Please check the file.");
+          return;
+        }
+
+        if (Object.keys(newMarks).length > 0) {
+          setMarks((prevMarks) => ({ ...prevMarks, ...newMarks }));
+          setShowMarksEntry(null);
+          setShowMarksTable(null);
+          alert("Marks successfully loaded from file. Review and save the marks.");
+        } else {
+          setFileError("No valid marks found for the students in the file.");
+        }
+      } else {
+        setFileError("Failed to extract marks from the file.");
+      }
+    } catch (error) {
+      console.error("Error processing file:", error);
+      setFileError("Failed to process file. Please check the file format and try again.");
     }
   };
 
@@ -144,27 +216,50 @@ const Assessments = () => {
     <div className="assessment-marks-container">
       <h2>Continuous Assessments (CA) Marks</h2>
 
-      {/* ✅ Select Course Dropdown */}
-      <label>Select Course:</label>
-      <select value={courseId} onChange={(e) => setCourseId(e.target.value)}>
-        {courses.map((course) => (
-          <option key={course._id} value={course._id}>
-            {course.courseName}
-          </option>
-        ))}
-      </select>
+      {/* Select Course Dropdown */}
+      <div className="selector">
+        <label>Select Course:</label>
+        <select value={courseId} onChange={(e) => setCourseId(e.target.value)} disabled={courses.length === 0}>
+          {courses.length > 0 ? (
+            courses.map((course) => (
+              <option key={course._id} value={course._id}>
+                {course.courseName}
+              </option>
+            ))
+          ) : (
+            <option value="">No courses available</option>
+          )}
+        </select>
+      </div>
 
-      {/* ✅ Select Class Dropdown */}
-      <label>Select Class:</label>
-      <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
-        {classes.map((cls) => (
-          <option key={cls._id} value={cls.name}>
-            {cls.name}
-          </option>
-        ))}
-      </select>
+      {/* Select Class Dropdown */}
+      <div className="selector">
+        <label>Select Class:</label>
+        <select
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          disabled={classes.length === 0}
+        >
+          {classes.length > 0 ? (
+            classes.map((cls) => (
+              <option key={cls._id} value={cls.name}>
+                {cls.name}
+              </option>
+            ))
+          ) : (
+            <option value="">No classes available</option>
+          )}
+        </select>
+      </div>
 
-      {/* ✅ Assessment Table */}
+      {/* File Upload */}
+      <div className="file-upload">
+        <label>Upload Marks File (Excel or PDF):</label>
+        <input type="file" accept=".xlsx,.xls,.pdf" onChange={handleFileUpload} />
+        {fileError && <p className="error">{fileError}</p>}
+      </div>
+
+      {/* Assessment Table */}
       <table className="assessment-table">
         <thead>
           <tr>
@@ -176,7 +271,7 @@ const Assessments = () => {
           {["CA1", "CA2"].map((assessment) => (
             <tr key={assessment}>
               <td>{assessment}</td>
-              <td>
+              <td className="action-buttons">
                 <button onClick={() => fetchSavedMarks(assessment)}>View Marks</button>
                 <button onClick={() => setShowMarksEntry(assessment)}>
                   {isMarksSaved[assessment] ? "Edit Marks" : "Enter Marks"}
@@ -187,10 +282,10 @@ const Assessments = () => {
         </tbody>
       </table>
 
-      {/* ✅ Enter Marks Section */}
+      {/* Enter Marks Section */}
       {showMarksEntry && (
-        <div>
-          <h3>Enter Marks for {showMarksEntry}</h3>
+        <div className="marks-entry">
+          <h3>{isMarksSaved[showMarksEntry] ? "Edit" : "Enter"} Marks for {showMarksEntry}</h3>
           <table>
             <thead>
               <tr>
@@ -208,10 +303,11 @@ const Assessments = () => {
                   <td>
                     <input
                       type="number"
-                      value={marks[student.rollNo]?.[showMarksEntry]?.entered || ""}
+                      value={marks[student.rollNo]?.[showMarksEntry]?.entered ?? ""}
                       onChange={(e) => handleMarkChange(student.rollNo, showMarksEntry, e.target.value)}
                       min="0"
                       max="50"
+                      placeholder="0"
                     />
                   </td>
                   <td>{marks[student.rollNo]?.[showMarksEntry]?.converted?.toFixed(2) || "0.00"}</td>
@@ -219,7 +315,34 @@ const Assessments = () => {
               ))}
             </tbody>
           </table>
-          <button onClick={() => saveMarks(showMarksEntry)}>Save {showMarksEntry} Marks</button>
+          <button onClick={() => saveMarks(showMarksEntry)} className="save-marks-btn">
+            Save {showMarksEntry} Marks
+          </button>
+        </div>
+      )}
+
+      {/* View Marks Section */}
+      {showMarksTable && (
+        <div className="marks-table">
+          <h3>Marks for {showMarksTable}</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Roll No</th>
+                <th>Student Name</th>
+                <th>Marks (Out of 20)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {students.map((student) => (
+                <tr key={student.rollNo}>
+                  <td>{student.rollNo}</td>
+                  <td>{student.name}</td>
+                  <td>{marks[student.rollNo]?.[showMarksTable]?.converted?.toFixed(2) || "0.00"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

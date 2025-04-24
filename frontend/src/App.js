@@ -21,6 +21,10 @@ import OverallInternals from "./components/OverallInternals.jsx";
 import Performance from "./components/Performance.jsx";
 import IndividualReport from "./components/IndividualReport.jsx";
 import SendMail from "./components/SendMail.jsx";
+import Help from "./components/Help.jsx";
+
+import ContactUs from "./components/contactus.jsx";
+
 
 const AppContent = () => {
   const [courses, setCourses] = useState([]);
@@ -58,8 +62,9 @@ const AppContent = () => {
        <Route path="/individual-report" element={<IndividualReport />} />
 <Route path="/send-mail" element={<SendMail />} />
 
+<Route path="/help" element={<Help />} />
 
-
+<Route path="/contact-us" element={<PrivateRoute><ContactUs /></PrivateRoute>} />
 
 
         {/* Reports & Consolidation */}

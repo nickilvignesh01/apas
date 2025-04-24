@@ -1,0 +1,111 @@
+/* General Container Styles */
+.help-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: #d3ced3;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 1000px;
+  margin: 20px auto;
+  box-shadow: 0 6px 16px rgba(244, 206, 239, 0.1);
+}
+
+/* Heading Styles */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #ffffff;
+  margin-bottom: 15px;
+}
+
+/* Section Styling */
+.help-section {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.help-section p {
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 15px;
+}
+
+.help-section ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-bottom: 15px;
+}
+
+.help-section li {
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.help-section ul ul {
+  list-style-type: circle;
+  padding-left: 20px;
+}
+
+.help-section code {
+  background-color: #edf2f7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95rem;
+}
+
+/* Action Buttons Container */
+.action-buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+
+
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .help-container {
+    padding: 20px;
+    margin: 10px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .help-section {
+    padding: 15px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+background-color: #3182ce;
+  }
+
+  button {
+    width: 100%;
+  }
+}

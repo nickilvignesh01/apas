@@ -23,7 +23,6 @@ const Tutorials = () => {
     loadSavedData();
   }, [courseId]);
 
-
   const loadSavedData = () => {
     const savedNumTutorials = localStorage.getItem(`numTutorials_${courseId}`);
     const savedMaxMarks = localStorage.getItem(`maxMarks_${courseId}`);
@@ -32,20 +31,17 @@ const Tutorials = () => {
       setNumTutorials(parseInt(savedNumTutorials, 10));
       setIsSaved(true);
     }
-
     if (savedMaxMarks) {
       setMaxMarks(JSON.parse(savedMaxMarks));
     }
   };
 
- 
   const saveTutorialData = () => {
     localStorage.setItem(`numTutorials_${courseId}`, numTutorials);
     localStorage.setItem(`maxMarks_${courseId}`, JSON.stringify(maxMarks));
     setIsSaved(true);
   };
 
-  
   const fetchCourseDetails = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/course/${courseId}`);
@@ -55,7 +51,6 @@ const Tutorials = () => {
     }
   };
 
- 
   const fetchClasses = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/classes");
@@ -68,7 +63,6 @@ const Tutorials = () => {
     }
   };
 
-
   const fetchCompletedTutorials = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/completed/${courseId}`);
@@ -78,7 +72,6 @@ const Tutorials = () => {
     }
   };
 
-  
   const fetchSavedMarks = async () => {
     try {
       const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
@@ -98,38 +91,34 @@ const Tutorials = () => {
     }
   };
 
-
   useEffect(() => {
-    if (isSaved) {
+    if (isSaved && numTutorials > 0) {
       const newTutorials = Array.from({ length: numTutorials }, (_, index) => ({
         tutorialId: index + 1,
-        maxMarks: maxMarks[index + 1] || 100,
+        maxMarks: maxMarks[index + 1] || 15, // Default to 15 for consistency with your data
       }));
       setTutorials(newTutorials);
+    } else {
+      setTutorials([]);
     }
   }, [isSaved, numTutorials, maxMarks]);
 
-  
-  
   const handleMaxMarksChange = (tutorialId, value) => {
     const updatedMaxMarks = { ...maxMarks, [tutorialId]: value };
     setMaxMarks(updatedMaxMarks);
-    localStorage.setItem(`maxMarks_${courseId}`, JSON.stringify(updatedMaxMarks)); 
+    localStorage.setItem(`maxMarks_${courseId}`, JSON.stringify(updatedMaxMarks));
   };
 
-  // Add More Tutorials
   const addMoreTutorials = () => {
     setNumTutorials((prev) => prev + 1);
     localStorage.setItem(`numTutorials_${courseId}`, numTutorials + 1);
   };
 
-  // Delete All Tutorials
   const deleteAllTutorials = async () => {
     if (!window.confirm("Are you sure you want to delete all tutorials?")) return;
 
     try {
       const response = await axios.delete(`http://localhost:5000/api/tutorial-marks/${courseId}`);
-
       if (response.status === 200) {
         setNumTutorials(0);
         setMaxMarks({});
@@ -137,65 +126,72 @@ const Tutorials = () => {
         setIsSaved(false);
         localStorage.removeItem(`numTutorials_${courseId}`);
         localStorage.removeItem(`maxMarks_${courseId}`);
-
         alert("All tutorials deleted successfully!");
       }
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        alert("No tutorials found to delete.");
-      } else {
-        console.error("Error deleting tutorials:", error);
-        alert("Failed to delete tutorials. Check console for details.");
-      }
+      console.error("Error deleting tutorials:", error);
+      alert("Failed to delete tutorials. Check console for details.");
     }
   };
 
   return (
     <div className="tutorials-container">
-      <h2>Manage Tutorials for {course?.courseName}</h2>
+      <h2>Manage Tutorials for {course?.courseName || "Course"}</h2>
 
       {/* Select Class */}
-      <label>Select Class:</label>
-      <select value={selectedClass} onChange={(e) => setSelectedClass(e.target.value)}>
-        {classes.map((cls) => (
-          <option key={cls._id} value={cls.name}>
-            {cls.name}
-          </option>
-        ))}
-      </select>
+      <div className="class-selector">
+        <label>Select Class:</label>
+        <select
+          value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          disabled={classes.length === 0}
+        >
+          {classes.length > 0 ? (
+            classes.map((cls) => (
+              <option key={cls._id} value={cls.name}>
+                {cls.name}
+              </option>
+            ))
+          ) : (
+            <option value="">No classes available</option>
+          )}
+        </select>
+      </div>
 
-      {/* Enter Number of Tutorials (Only if not saved) */}
+      {/* Enter Number of Tutorials */}
       {!isSaved && (
         <div className="tutorial-input">
-          <label>Enter No. of Tutorials:</label>
+          <label>Number of Tutorials:</label>
           <input
             type="number"
             placeholder="Enter number of tutorials"
             value={numTutorials}
-            onChange={(e) => setNumTutorials(Number(e.target.value))}
-            min="1"
+            onChange={(e) => setNumTutorials(Math.max(0, Number(e.target.value)))}
+            min="0"
           />
-          <button onClick={saveTutorialData}>Save</button>
+          <button onClick={saveTutorialData} disabled={numTutorials <= 0}>
+            Save Tutorials
+          </button>
         </div>
       )}
 
-      {/* Add More Tutorials Button */}
+      {/* Action Buttons */}
       {isSaved && (
-        <button className="add-tutorial-btn" onClick={addMoreTutorials}>
-          Add More Tutorials
-        </button>
-      )}
-
-      {/* Delete All Tutorials Button */}
-      {isSaved && tutorials.length > 0 && (
-        <button className="delete-tutorial-btn" onClick={deleteAllTutorials}>
-          Delete All Tutorials
-        </button>
+        <div className="action-buttons">
+          <button className="add-tutorial-btn" onClick={addMoreTutorials}>
+            Add Tutorial
+          </button>
+          {tutorials.length > 0 && (
+            <button className="delete-tutorial-btn" onClick={deleteAllTutorials}>
+              Delete All Tutorials
+            </button>
+          )}
+        </div>
       )}
 
       {/* Tutorial List */}
       {isSaved && tutorials.length > 0 && (
-        <div className="tutorial-buttons">
+        <div className="tutorial-list">
           {tutorials.map((tut, index) => {
             const isCompleted = completedTutorials.includes(tut.tutorialId);
             const savedMark = savedMarks[tut.tutorialId];
@@ -203,28 +199,24 @@ const Tutorials = () => {
             return (
               <div key={tut.tutorialId} className="tutorial-item">
                 <h3>Tutorial {index + 1}</h3>
-                {/* Render max marks input only if the button is "Enter Marks" */}
                 {!isCompleted && !savedMark && (
-                  <div>
+                  <div className="max-marks-input">
                     <label>Max Marks:</label>
                     <input
                       type="number"
-                      value={maxMarks[tut.tutorialId] || 100}
+                      value={maxMarks[tut.tutorialId] || 15}
                       onChange={(e) => handleMaxMarksChange(tut.tutorialId, Number(e.target.value))}
+                      min="1"
                     />
                   </div>
                 )}
-
                 <div className="tutorial-actions">
-                  {/* Edit Marks Button */}
                   <Link
-                    to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${maxMarks[tut.tutorialId] || 100}`}
+                    to={`/mark-entry/${courseId}/${selectedClass}/${tut.tutorialId}/${maxMarks[tut.tutorialId] || 15}`}
                     className="edit-btn"
                   >
                     {isCompleted || savedMark ? "Edit Marks" : "Enter Marks"}
                   </Link>
-
-                  {/* View Marks Button */}
                   <Link
                     to={`/view-marks/${courseId}/${tut.tutorialId}`}
                     className="view-btn"

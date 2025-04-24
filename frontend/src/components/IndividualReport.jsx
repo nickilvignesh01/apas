@@ -4,7 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import html2canvas from "html2canvas";
-import "../css/Reports.css";
+import "../css/performance.css";
 
 const IndividualReport = () => {
   const [courseId, setCourseId] = useState("");

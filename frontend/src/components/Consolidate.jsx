@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import jsPDF from "jspdf";
@@ -8,33 +8,30 @@ import "../css/Reports.css";
 const Consolidate = () => {
   const { courseId } = useParams();
   const [marksData, setMarksData] = useState([]);
-  const [courseName, setCourseName] = useState("");
   const [assignmentMarks, setAssignmentMarks] = useState({});
+  const [courseName, setCourseName] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedClass, setSelectedClass] = useState("All");
   const [availableClasses, setAvailableClasses] = useState([]);
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState("rollNo"); // 'rollNo', 'asc', 'desc'
 
-  useEffect(() => {
-    fetchData();
-  }, [courseId]);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const [marksRes, courseRes, classesRes, assignmentRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
-        axios.get(`http://localhost:5000/api/course/${courseId}`),
-        axios.get(`http://localhost:5000/api/classes`),
-        axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`),
+        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`).catch(() => ({ data: [] })),
+        axios.get(`http://localhost:5000/api/course/${courseId}`).catch(() => ({ data: { courseName: "Unknown Course" } })),
+        axios.get(`http://localhost:5000/api/classes`).catch(() => ({ data: [] })),
+        axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`).catch(() => ({ data: [] })),
       ]);
 
       setMarksData(marksRes.data);
       setCourseName(courseRes.data.courseName || "Unknown Course");
       setAvailableClasses(classesRes.data.map((cls) => cls.name.toLowerCase()));
+
       const assignmentMap = {};
       assignmentRes.data.forEach((entry) => {
         assignmentMap[entry.rollNo] = entry.marks;
@@ -42,11 +39,15 @@ const Consolidate = () => {
       setAssignmentMarks(assignmentMap);
     } catch (error) {
       console.error("Error fetching data:", error);
-      setError("Failed to fetch data. Please check the server and try again.");
+      setError("Failed to fetch some data. Check the server and try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const extractNumericRoll = (rollNo) => {
     const match = rollNo.match(/\d+$/);
@@ -55,7 +56,6 @@ const Consolidate = () => {
 
   const groupMarksByStudent = () => {
     const selected = selectedClass.trim().toLowerCase();
-
     const filtered =
       selected === "all"
         ? marksData
@@ -70,7 +70,7 @@ const Consolidate = () => {
           studentName: studentName || rollNo,
           rollNo,
           tutorialMarks: {},
-          assignmentMarks: assignmentMarks?.[rollNo] || "N/A",
+          assignmentMarks: assignmentMarks[rollNo] || "N/A",
         };
       }
 
@@ -142,7 +142,7 @@ const Consolidate = () => {
           (tid) => `${student.tutorialMarks[tid]?.marks ?? "N/A"} / ${student.tutorialMarks[tid]?.maxMarks ?? "N/A"}`
         ),
         tutorialOutOf15.toFixed(2),
-        student.assignmentMarks,
+        student.assignmentMarks !== "N/A" ? student.assignmentMarks.toFixed(2) : "N/A",
         totalMarks.toFixed(2),
       ];
 
@@ -220,7 +220,7 @@ const Consolidate = () => {
                       );
                     })}
                     <td>{tutorialOutOf15.toFixed(2)}</td>
-                    <td>{student.assignmentMarks}</td>
+                    <td>{student.assignmentMarks !== "N/A" ? student.assignmentMarks.toFixed(2) : "N/A"}</td>
                     <td>{total.toFixed(2)}</td>
                   </tr>
                 );

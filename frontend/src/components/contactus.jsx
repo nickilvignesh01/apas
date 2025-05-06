@@ -14,9 +14,9 @@ const ContactUs = () => {
         </p>
         <h2>Contact Information</h2>
         <p>
-          <strong>Email</strong>: it.support@your-institution.edu<br />
-          <strong>Phone</strong>: +91-123-456-7890<br />
-          <strong>Office</strong>: IT Support Office, Academic Block, Your Institution
+          <strong>Email</strong>: 23mx330@psgetch.ac.in<br />
+          <strong>Phone</strong>: +91-7010362874<br />
+          <strong>Office</strong>: IT Support Office, Academic Block, psg Institution
         </p>
         <h2>Support Hours</h2>
         <p>

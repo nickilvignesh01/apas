@@ -15,6 +15,7 @@ const Assessments = () => {
   const [showMarksTable, setShowMarksTable] = useState(null);
   const [isMarksSaved, setIsMarksSaved] = useState({ CA1: false, CA2: false });
   const [fileError, setFileError] = useState("");
+  const [selectedAssessment, setSelectedAssessment] = useState("CA1"); // New state for file upload
 
   useEffect(() => {
     fetchCourses();
@@ -56,7 +57,6 @@ const Assessments = () => {
     if (!selectedClass) return;
     try {
       const res = await axios.get(`http://localhost:5000/api/students?className=${selectedClass}`);
-      // Sort students by roll number
       const sortedStudents = res.data.sort((a, b) => {
         const rollNoA = a.rollNo.replace(/[^\d]/g, '');
         const rollNoB = b.rollNo.replace(/[^\d]/g, '');
@@ -184,8 +184,11 @@ const Assessments = () => {
               return;
             }
             newMarks[student.rollNo] = {
-              CA1: { entered: enteredMark, converted: convertMarksTo20(enteredMark) },
-              CA2: { entered: enteredMark, converted: convertMarksTo20(enteredMark) },
+              ...marks[student.rollNo],
+              [selectedAssessment]: {
+                entered: enteredMark,
+                converted: convertMarksTo20(enteredMark),
+              },
             };
           }
         });
@@ -197,9 +200,10 @@ const Assessments = () => {
 
         if (Object.keys(newMarks).length > 0) {
           setMarks((prevMarks) => ({ ...prevMarks, ...newMarks }));
-          setShowMarksEntry(null);
+          setShowMarksEntry(selectedAssessment); // Show marks entry table
           setShowMarksTable(null);
-          alert("Marks successfully loaded from file. Review and save the marks.");
+          setIsMarksSaved((prev) => ({ ...prev, [selectedAssessment]: false })); // Marks loaded, not saved
+          alert(`Marks for ${selectedAssessment} successfully loaded from file. Review and save.`);
         } else {
           setFileError("No valid marks found for the students in the file.");
         }
@@ -252,9 +256,16 @@ const Assessments = () => {
         </select>
       </div>
 
-      {/* File Upload */}
+      {/* File Upload with Assessment Selection */}
       <div className="file-upload">
-        <label>Upload Marks File (Excel or PDF):</label>
+        <label>Upload Marks File (Excel or PDF) for:</label>
+        <select
+          value={selectedAssessment}
+          onChange={(e) => setSelectedAssessment(e.target.value)}
+        >
+          <option value="CA1">CA1</option>
+          <option value="CA2">CA2</option>
+        </select>
         <input type="file" accept=".xlsx,.xls,.pdf" onChange={handleFileUpload} />
         {fileError && <p className="error">{fileError}</p>}
       </div>

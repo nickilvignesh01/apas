@@ -201,14 +201,15 @@ const Performance = () => {
     <div className="performance-container">
       {/* Header */}
       <div className="header-container fade-in">
-        <h1 className="page-title">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 20V10"></path>
-            <path d="M18 20V4"></path>
-            <path d="M6 20v-4"></path>
-          </svg>
-          Student Performance Analysis
-        </h1>
+        <h1 style={{ color: 'white', display: 'flex', alignItems: 'center', gap: '8px' }}>
+  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 20V10"></path>
+    <path d="M18 20V4"></path>
+    <path d="M6 20v-4"></path>
+  </svg>
+  Student Performance Analysis
+</h1>
+
         <p className="page-subtitle">Track and analyze student performance across courses and classes</p>
       </div>
 

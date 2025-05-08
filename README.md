@@ -2,6 +2,7 @@
 
 APA is a web-based platform designed to simplify academic management for faculty in higher education institutions. It automates mark entry, analyzes student performance, generates reports, and sends notifications to students.
 
+link:https://apas-pvdp.vercel.app/login
 ---
 
 ## 🚀 Features

@@ -10,7 +10,7 @@ const Courses = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/course") // Corrected URL to /api/course
+      .get("${process.env.REACT_APP_API}/api/course") // Corrected URL to /api/course
       .then((response) => {
         setCourses(response.data);
         setLoading(false);

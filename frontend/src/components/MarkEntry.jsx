@@ -20,7 +20,7 @@ const MarkEntry = () => {
 // Fetch Students
 const fetchStudents = async () => {
   try {
-    const res = await axios.get(`http://localhost:5000/api/students?className=${className}`);
+    const res = await axios.get(`${process.env.REACT_APP_API}/api/students?className=${className}`);
     
     // Sort students by roll number
     const sortedStudents = res.data.sort((a, b) => {
@@ -40,7 +40,7 @@ const fetchStudents = async () => {
   // Fetch Saved Marks
   const fetchSavedMarks = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}/${tutorialId}`);
       if (res.data && Array.isArray(res.data)) {
         const savedMarks = {};
         res.data.forEach((entry) => {
@@ -72,7 +72,7 @@ const fetchStudents = async () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
+      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -122,8 +122,8 @@ if (res.data.marks[studentRoll] !== undefined) {
     console.log("📥 Saving Marks:", requestData); // Debugging log
 
     try {
-      await axios.post("http://localhost:5000/api/tutorial-marks", requestData);
-      await axios.post("http://localhost:5000/api/tutorial-marks/complete-tutorial", { courseId, tutorialId });
+      await axios.post("${process.env.REACT_APP_API}/api/tutorial-marks", requestData);
+      await axios.post("${process.env.REACT_APP_API}/api/tutorial-marks/complete-tutorial", { courseId, tutorialId });
 
       alert("Marks saved successfully!");
       navigate(`/tutorials/${courseId}`);

@@ -22,10 +22,10 @@ const Consolidate = () => {
       setError(null);
 
       const [marksRes, courseRes, classesRes, assignmentRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`).catch(() => ({ data: [] })),
-        axios.get(`http://localhost:5000/api/course/${courseId}`).catch(() => ({ data: { courseName: "Unknown Course" } })),
-        axios.get(`http://localhost:5000/api/classes`).catch(() => ({ data: [] })),
-        axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/1`).catch(() => ({ data: [] })),
+        axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`).catch(() => ({ data: [] })),
+        axios.get(`${process.env.REACT_APP_API}/api/course/${courseId}`).catch(() => ({ data: { courseName: "Unknown Course" } })),
+        axios.get(`${process.env.REACT_APP_API}/api/classes`).catch(() => ({ data: [] })),
+        axios.get(`${process.env.REACT_APP_API}/api/assignment-marks/${courseId}/1`).catch(() => ({ data: [] })),
       ]);
 
       setMarksData(marksRes.data);

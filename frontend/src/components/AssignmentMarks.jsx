@@ -34,7 +34,7 @@ const AssignmentMarks = () => {
 
   const fetchCourseDetails = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/course/${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/course/${courseId}`);
       setCourse(res.data);
     } catch (error) {
       console.error("Error fetching course:", error);
@@ -43,7 +43,7 @@ const AssignmentMarks = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/classes");
+      const res = await axios.get("${process.env.REACT_APP_API}/api/classes");
       setClasses(res.data);
       if (res.data.length > 0) {
         setSelectedClass(res.data[0].name);
@@ -56,7 +56,7 @@ const AssignmentMarks = () => {
   const fetchStudents = async () => {
     try {
       if (!selectedClass) return;
-      const res = await axios.get(`http://localhost:5000/api/students?className=${selectedClass}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/students?className=${selectedClass}`);
       setStudents(res.data);
 
       // Reset marks when fetching students
@@ -73,7 +73,7 @@ const AssignmentMarks = () => {
 
   const fetchSavedMarks = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/assignment-marks/${courseId}/${assignment.id}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/assignment-marks/${courseId}/${assignment.id}`);
       console.log("fetchSavedMarks response:", res.data); // Debug log
       if (res.data && Array.isArray(res.data)) {
         const savedMarks = {};
@@ -103,7 +103,7 @@ const AssignmentMarks = () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
+      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("handleFileUpload response:", res.data); // Debug log
@@ -143,7 +143,7 @@ const AssignmentMarks = () => {
     }));
 
     try {
-      const res = await axios.post("http://localhost:5000/api/assignment-marks", requestData);
+      const res = await axios.post("${process.env.REACT_APP_API}/api/assignment-marks", requestData);
       console.log("saveMarks response:", res.data); // Debug log
       setIsMarksSaved(true);
       setIsEditing(false);

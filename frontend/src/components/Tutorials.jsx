@@ -44,7 +44,7 @@ const Tutorials = () => {
 
   const fetchCourseDetails = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/course/${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/course/${courseId}`);
       setCourse(res.data);
     } catch (error) {
       console.error("Error fetching course:", error);
@@ -53,7 +53,7 @@ const Tutorials = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/classes");
+      const res = await axios.get("${process.env.REACT_APP_API}/api/classes");
       setClasses(res.data);
       if (res.data.length > 0) {
         setSelectedClass(res.data[0].name);
@@ -65,7 +65,7 @@ const Tutorials = () => {
 
   const fetchCompletedTutorials = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/completed/${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/completed/${courseId}`);
       setCompletedTutorials(res.data || []);
     } catch (error) {
       console.error("Error fetching completed tutorials:", error);
@@ -74,7 +74,7 @@ const Tutorials = () => {
 
   const fetchSavedMarks = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`);
       if (res.data.length === 0) {
         setSavedMarks({});
         localStorage.removeItem(`numTutorials_${courseId}`);
@@ -118,7 +118,7 @@ const Tutorials = () => {
     if (!window.confirm("Are you sure you want to delete all tutorials?")) return;
 
     try {
-      const response = await axios.delete(`http://localhost:5000/api/tutorial-marks/${courseId}`);
+      const response = await axios.delete(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`);
       if (response.status === 200) {
         setNumTutorials(0);
         setMaxMarks({});

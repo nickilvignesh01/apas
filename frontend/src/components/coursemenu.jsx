@@ -12,7 +12,7 @@
     // Fetch course details on page load or courseId change
     useEffect(() => {
         axios
-        .get(`http://localhost:5000/api/course/${courseId}`) // Use the courseId in the URL to fetch course details
+        .get(`${process.env.REACT_APP_API}/api/course/${courseId}`) // Use the courseId in the URL to fetch course details
         .then((response) => {
             setCourse(response.data); // Set the course details into the state
             setLoading(false);
@@ -42,7 +42,7 @@
 
         <div className="syllabus-download">
             {/* Assuming syllabus is a file path stored in the database */}
-            <a href={`http://localhost:5000/${course?.syllabus}`} target="_blank" rel="noopener noreferrer">
+            <a href={`${process.env.REACT_APP_API}/${course?.syllabus}`} target="_blank" rel="noopener noreferrer">
             <button className="btn">Download Syllabus</button>
             </a>
         </div>

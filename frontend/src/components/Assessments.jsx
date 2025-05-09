@@ -32,7 +32,7 @@ const Assessments = () => {
   // Fetch Courses
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/course");
+      const res = await axios.get("${process.env.REACT_APP_API}/api/course");
       setCourses(res.data);
       if (res.data.length > 0 && !courseId) setCourseId(res.data[0]._id);
     } catch (error) {
@@ -44,7 +44,7 @@ const Assessments = () => {
   // Fetch Classes
   const fetchClasses = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/classes?courseId=${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/classes?courseId=${courseId}`);
       setClasses(res.data);
       if (res.data.length > 0) setSelectedClass(res.data[0].name);
     } catch (error) {
@@ -56,7 +56,7 @@ const Assessments = () => {
   const fetchStudents = async () => {
     if (!selectedClass) return;
     try {
-      const res = await axios.get(`http://localhost:5000/api/students?className=${selectedClass}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/students?className=${selectedClass}`);
       const sortedStudents = res.data.sort((a, b) => {
         const rollNoA = a.rollNo.replace(/[^\d]/g, '');
         const rollNoB = b.rollNo.replace(/[^\d]/g, '');
@@ -72,7 +72,7 @@ const Assessments = () => {
   // Fetch Saved Marks
   const fetchSavedMarks = async (assessmentId) => {
     try {
-      const res = await axios.get("http://localhost:5000/api/assessment/marks", {
+      const res = await axios.get("${process.env.REACT_APP_API}/api/assessment/marks", {
         params: { courseId, assessmentId },
       });
 
@@ -140,7 +140,7 @@ const Assessments = () => {
     }));
 
     try {
-      await axios.post("http://localhost:5000/api/assessment/marks", requestData);
+      await axios.post("${process.env.REACT_APP_API}/api/assessment/marks", requestData);
       setIsMarksSaved((prev) => ({ ...prev, [assessmentId]: true }));
       setShowMarksEntry(null);
       alert(`Marks for ${assessmentId} saved successfully!`);
@@ -165,7 +165,7 @@ const Assessments = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post("http://localhost:5000/api/upload-marks", formData, {
+      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

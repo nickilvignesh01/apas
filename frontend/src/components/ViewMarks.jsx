@@ -15,7 +15,7 @@ const ViewMarks = () => {
   // Function to fetch marks from the server
   const fetchMarks = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}/${tutorialId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}/${tutorialId}`);
 
       // Filter to keep only the latest marks for each student
       const latestMarks = Object.values(

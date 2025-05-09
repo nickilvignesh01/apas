@@ -31,8 +31,8 @@ const Performance = () => {
   const fetchCourses = async () => {
     try {
       const [coursesRes, classesRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/course"),
-        axios.get("http://localhost:5000/api/classes"),
+        axios.get("${process.env.REACT_APP_API}/api/course"),
+        axios.get("${process.env.REACT_APP_API}/api/classes"),
       ]);
 
       if (coursesRes.data.length > 0) {
@@ -56,7 +56,7 @@ const Performance = () => {
     setError(null);
 
     try {
-      const res = await axios.get(`http://localhost:5000/api/overall-marks/${selectedCourseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/overall-marks/${selectedCourseId}`);
 
       if (!res.data || res.data.length === 0) {
         setError("No student marks found for this course.");

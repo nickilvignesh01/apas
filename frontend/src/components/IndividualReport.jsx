@@ -44,8 +44,8 @@ const IndividualReport = () => {
       setLoading(true);
       setError(null);
       const [coursesRes, classesRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/course"),
-        axios.get("http://localhost:5000/api/classes"),
+        axios.get("${process.env.REACT_APP_API}/api/course"),
+        axios.get("${process.env.REACT_APP_API}/api/classes"),
       ]);
 
       if (coursesRes.data.length > 0) {
@@ -72,8 +72,8 @@ const IndividualReport = () => {
       setError(null);
       setSelectedStudent(null);
       const [overallMarksRes, tutorialMarksRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/overall-marks/${courseId}`),
-        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
+        axios.get(`${process.env.REACT_APP_API}/api/overall-marks/${courseId}`),
+        axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`),
       ]);
 
       const selected = selectedClass.trim().toLowerCase();

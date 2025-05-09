@@ -24,9 +24,9 @@ const Reports = () => {
 
       // Fetch marks, course, and classes concurrently
       const [marksRes, courseRes, classesRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
-        axios.get(`http://localhost:5000/api/course/${courseId}`), // Adjusted to match your API
-        axios.get(`http://localhost:5000/api/classes`),
+        axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`),
+        axios.get(`${process.env.REACT_APP_API}/api/course/${courseId}`), // Adjusted to match your API
+        axios.get(`${process.env.REACT_APP_API}/api/classes`),
       ]);
 
       console.log("Tutorial Marks Response (Sample):", JSON.stringify(marksRes.data.slice(0, 3), null, 2));

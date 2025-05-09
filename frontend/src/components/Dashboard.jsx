@@ -19,14 +19,14 @@ const Dashboard = () => {
       try {
         setIsLoading(true);
         // Fetch courses
-        const coursesRes = await axios.get("http://localhost:5000/api/course");
+        const coursesRes = await axios.get("${process.env.REACT_APP_API}/api/course");
         const fetchedCourses = coursesRes.data;
         setCourses(fetchedCourses);
 
         // Fetch students at risk
         let totalAtRisk = 0;
         for (const course of fetchedCourses) {
-          const marksRes = await axios.get(`http://localhost:5000/api/overall-marks/${course._id}`);
+          const marksRes = await axios.get(`${process.env.REACT_APP_API}/api/overall-marks/${course._id}`);
           const lowPerformers = marksRes.data.filter(
             (mark) => ((mark.total / 50) * 40) < 18
           );

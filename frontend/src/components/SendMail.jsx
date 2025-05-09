@@ -27,7 +27,7 @@ const SendMail = () => {
     try {
       setLoading(true);
       setError(null);
-      const coursesRes = await axios.get("http://localhost:5000/api/course");
+      const coursesRes = await axios.get("${process.env.REACT_APP_API}/api/course");
       if (coursesRes.data.length > 0) {
         setCourses(coursesRes.data);
         setCourseId(coursesRes.data[0]._id);
@@ -54,8 +54,8 @@ const SendMail = () => {
       console.log("Fetching students for courseId:", courseId);
 
       const [overallMarksRes, tutorialMarksRes] = await Promise.all([
-        axios.get(`http://localhost:5000/api/overall-marks/${courseId}`),
-        axios.get(`http://localhost:5000/api/tutorial-marks/${courseId}`),
+        axios.get(`${process.env.REACT_APP_API}/api/overall-marks/${courseId}`),
+        axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${courseId}`),
       ]);
 
       const classNames = [...new Set(overallMarksRes.data.map((mark) => mark.className))];
@@ -67,7 +67,7 @@ const SendMail = () => {
 
       const studentsRes = await Promise.all(
         classNames.map((className) =>
-          axios.get(`http://localhost:5000/api/students?className=${encodeURIComponent(className)}`)
+          axios.get(`${process.env.REACT_APP_API}/api/students?className=${encodeURIComponent(className)}`)
         )
       );
       const allStudents = studentsRes.flatMap((res) => res.data);
@@ -301,7 +301,7 @@ const SendMail = () => {
       formData.append("targetMainMark", targetMainMark);
       formData.append("pdf", pdfBlob, `Individual_Report_${student.rollNo}_${course.courseName}.pdf`);
 
-      const response = await axios.post("http://localhost:5000/api/send-email", formData, {
+      const response = await axios.post("${process.env.REACT_APP_API}/api/send-email", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

@@ -26,8 +26,8 @@ const OverallInternals = () => {
   const fetchCourses = async () => {
     try {
       const [coursesRes, classesRes] = await Promise.all([
-        axios.get("${process.env.REACT_APP_API}/api/course"),
-        axios.get("${process.env.REACT_APP_API}/api/classes"),
+        axios.get(`${process.env.REACT_APP_API}/api/course`),
+        axios.get(`${process.env.REACT_APP_API}/api/classes`),
       ]);
 
       console.log("Courses Response:", coursesRes.data);
@@ -57,10 +57,10 @@ const OverallInternals = () => {
       const [tutorialRes, assignmentRes, ca1Res, ca2Res] = await Promise.allSettled([
         axios.get(`${process.env.REACT_APP_API}/api/tutorial-marks/${selectedCourseId}`),
         axios.get(`${process.env.REACT_APP_API}/api/assignment-marks/${selectedCourseId}/1`),
-        axios.get("${process.env.REACT_APP_API}/api/assessment/marks", {
+        axios.get(`${process.env.REACT_APP_API}/api/assessment/marks`, {
           params: { courseId: selectedCourseId, assessmentId: "CA1" },
         }),
-        axios.get("${process.env.REACT_APP_API}/api/assessment/marks", {
+        axios.get(`${process.env.REACT_APP_API}/api/assessment/marks`, {
           params: { courseId: selectedCourseId, assessmentId: "CA2" },
         }),
       ]);
@@ -199,7 +199,7 @@ const OverallInternals = () => {
   // ✅ Save Total Marks to Backend
   const saveTotalMarks = async (studentsData, courseId) => {
     try {
-      await axios.post("${process.env.REACT_APP_API}/api/overall-marks/save", {
+      await axios.post(`${process.env.REACT_APP_API}/api/overall-marks/save`, {
         students: studentsData,
         courseId,
       });

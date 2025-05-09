@@ -19,7 +19,7 @@ const Dashboard = () => {
       try {
         setIsLoading(true);
         // Fetch courses
-        const coursesRes = await axios.get("${process.env.REACT_APP_API}/api/course");
+        const coursesRes = await axios.get(`${process.env.REACT_APP_API}/api/course`);
         const fetchedCourses = coursesRes.data;
         setCourses(fetchedCourses);
 

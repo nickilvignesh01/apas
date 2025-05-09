@@ -17,7 +17,7 @@ const MyClass = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("${process.env.REACT_APP_API}/api/classes");
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/classes`);
       setClasses(res.data);
       if (res.data.length > 0) {
         setSelectedClass(res.data[0].name);
@@ -44,7 +44,7 @@ const MyClass = () => {
     }
 
     try {
-      const res = await axios.post("${process.env.REACT_APP_API}/api/classes", { name: newClass });
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/classes`, { name: newClass });
       setClasses([...classes, res.data]);
       setSelectedClass(res.data.name);
       setNewClass("");
@@ -60,7 +60,7 @@ const MyClass = () => {
     }
 
     try {
-      const res = await axios.post("${process.env.REACT_APP_API}/api/students", {
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/students`, {
         ...newStudent,
         className: selectedClass,
       });
@@ -85,7 +85,7 @@ const handleFileUpload = async (e) => {
   formData.append("className", selectedClass);
 
   try {
-    const res = await axios.post("${process.env.REACT_APP_API}/api/upload-students", formData, {
+    const res = await axios.post(`${process.env.REACT_APP_API}/api/upload-students`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
 

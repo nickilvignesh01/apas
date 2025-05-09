@@ -31,8 +31,8 @@ const Performance = () => {
   const fetchCourses = async () => {
     try {
       const [coursesRes, classesRes] = await Promise.all([
-        axios.get("${process.env.REACT_APP_API}/api/course"),
-        axios.get("${process.env.REACT_APP_API}/api/classes"),
+        axios.get(`${process.env.REACT_APP_API}/api/course`),
+        axios.get(`${process.env.REACT_APP_API}/api/classes`),
       ]);
 
       if (coursesRes.data.length > 0) {

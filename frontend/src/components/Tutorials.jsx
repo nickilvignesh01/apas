@@ -53,7 +53,7 @@ const Tutorials = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("${process.env.REACT_APP_API}/api/classes");
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/classes`);
       setClasses(res.data);
       if (res.data.length > 0) {
         setSelectedClass(res.data[0].name);

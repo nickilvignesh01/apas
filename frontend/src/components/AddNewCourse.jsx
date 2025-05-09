@@ -32,7 +32,7 @@ const AddNewCourse = () => {
     formData.append("duration", duration);  // Include duration in form data
 
     try {
-      const response = await axios.post("${process.env.REACT_APP_API}/api/course", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API}/api/course`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log(response.data);

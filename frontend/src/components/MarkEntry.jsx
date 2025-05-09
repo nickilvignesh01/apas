@@ -72,7 +72,7 @@ const fetchStudents = async () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/upload-marks`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -122,8 +122,8 @@ if (res.data.marks[studentRoll] !== undefined) {
     console.log("📥 Saving Marks:", requestData); // Debugging log
 
     try {
-      await axios.post("${process.env.REACT_APP_API}/api/tutorial-marks", requestData);
-      await axios.post("${process.env.REACT_APP_API}/api/tutorial-marks/complete-tutorial", { courseId, tutorialId });
+      await axios.post(`${process.env.REACT_APP_API}/api/tutorial-marks`, requestData);
+      await axios.post(`${process.env.REACT_APP_API}/api/tutorial-marks/complete-tutorial`, { courseId, tutorialId });
 
       alert("Marks saved successfully!");
       navigate(`/tutorials/${courseId}`);

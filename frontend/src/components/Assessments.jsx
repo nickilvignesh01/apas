@@ -15,7 +15,10 @@ const Assessments = () => {
   const [showMarksTable, setShowMarksTable] = useState(null);
   const [isMarksSaved, setIsMarksSaved] = useState({ CA1: false, CA2: false });
   const [fileError, setFileError] = useState("");
-  const [selectedAssessment, setSelectedAssessment] = useState("CA1"); // New state for file upload
+  const [selectedAssessment, setSelectedAssessment] = useState("CA1");
+
+  // Log the API URL for debugging
+  console.log('API URL in Assessments.jsx:', process.env.REACT_APP_API_URL);
 
   useEffect(() => {
     fetchCourses();
@@ -32,7 +35,7 @@ const Assessments = () => {
   // Fetch Courses
   const fetchCourses = async () => {
     try {
-      const res = await axios.get("${process.env.REACT_APP_API}/api/course");
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/course`);
       setCourses(res.data);
       if (res.data.length > 0 && !courseId) setCourseId(res.data[0]._id);
     } catch (error) {
@@ -44,7 +47,7 @@ const Assessments = () => {
   // Fetch Classes
   const fetchClasses = async () => {
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API}/api/classes?courseId=${courseId}`);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/classes?courseId=${courseId}`);
       setClasses(res.data);
       if (res.data.length > 0) setSelectedClass(res.data[0].name);
     } catch (error) {
@@ -56,7 +59,7 @@ const Assessments = () => {
   const fetchStudents = async () => {
     if (!selectedClass) return;
     try {
-      const res = await axios.get(`${process.env.REACT_APP_API}/api/students?className=${selectedClass}`);
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/students?className=${selectedClass}`);
       const sortedStudents = res.data.sort((a, b) => {
         const rollNoA = a.rollNo.replace(/[^\d]/g, '');
         const rollNoB = b.rollNo.replace(/[^\d]/g, '');
@@ -72,7 +75,7 @@ const Assessments = () => {
   // Fetch Saved Marks
   const fetchSavedMarks = async (assessmentId) => {
     try {
-      const res = await axios.get("${process.env.REACT_APP_API}/api/assessment/marks", {
+      const res = await axios.get(`${process.env.REACT_APP_API_URL}/assessment/marks`, {
         params: { courseId, assessmentId },
       });
 
@@ -90,6 +93,8 @@ const Assessments = () => {
         setIsMarksSaved((prev) => ({ ...prev, [assessmentId]: true }));
         setShowMarksTable(assessmentId);
         setShowMarksEntry(null);
+      } else {
+        alert("No saved marks found for this assessment.");
       }
     } catch (error) {
       console.error("Error fetching saved marks:", error);
@@ -140,7 +145,7 @@ const Assessments = () => {
     }));
 
     try {
-      await axios.post("${process.env.REACT_APP_API}/api/assessment/marks", requestData);
+      await axios.post(`${process.env.REACT_APP_API_URL}/assessment/marks`, requestData);
       setIsMarksSaved((prev) => ({ ...prev, [assessmentId]: true }));
       setShowMarksEntry(null);
       alert(`Marks for ${assessmentId} saved successfully!`);
@@ -165,7 +170,7 @@ const Assessments = () => {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
+      const res = await axios.post(`${process.env.REACT_APP_API_URL}/upload-marks`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -200,9 +205,9 @@ const Assessments = () => {
 
         if (Object.keys(newMarks).length > 0) {
           setMarks((prevMarks) => ({ ...prevMarks, ...newMarks }));
-          setShowMarksEntry(selectedAssessment); // Show marks entry table
+          setShowMarksEntry(selectedAssessment);
           setShowMarksTable(null);
-          setIsMarksSaved((prev) => ({ ...prev, [selectedAssessment]: false })); // Marks loaded, not saved
+          setIsMarksSaved((prev) => ({ ...prev, [selectedAssessment]: false }));
           alert(`Marks for ${selectedAssessment} successfully loaded from file. Review and save.`);
         } else {
           setFileError("No valid marks found for the students in the file.");

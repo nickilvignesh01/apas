@@ -43,7 +43,7 @@ const AssignmentMarks = () => {
 
   const fetchClasses = async () => {
     try {
-      const res = await axios.get("${process.env.REACT_APP_API}/api/classes");
+      const res = await axios.get(`${process.env.REACT_APP_API}/api/classes`);
       setClasses(res.data);
       if (res.data.length > 0) {
         setSelectedClass(res.data[0].name);
@@ -103,7 +103,7 @@ const AssignmentMarks = () => {
     formData.append("file", file);
 
     try {
-      const res = await axios.post("${process.env.REACT_APP_API}/api/upload-marks", formData, {
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/upload-marks`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("handleFileUpload response:", res.data); // Debug log
@@ -143,7 +143,7 @@ const AssignmentMarks = () => {
     }));
 
     try {
-      const res = await axios.post("${process.env.REACT_APP_API}/api/assignment-marks", requestData);
+      const res = await axios.post(`${process.env.REACT_APP_API}/api/assignment-marks`, requestData);
       console.log("saveMarks response:", res.data); // Debug log
       setIsMarksSaved(true);
       setIsEditing(false);

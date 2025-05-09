@@ -27,7 +27,7 @@ const SendMail = () => {
     try {
       setLoading(true);
       setError(null);
-      const coursesRes = await axios.get("${process.env.REACT_APP_API}/api/course");
+      const coursesRes = await axios.get(`${process.env.REACT_APP_API}/api/course`);
       if (coursesRes.data.length > 0) {
         setCourses(coursesRes.data);
         setCourseId(coursesRes.data[0]._id);
@@ -301,7 +301,7 @@ const SendMail = () => {
       formData.append("targetMainMark", targetMainMark);
       formData.append("pdf", pdfBlob, `Individual_Report_${student.rollNo}_${course.courseName}.pdf`);
 
-      const response = await axios.post("${process.env.REACT_APP_API}/api/send-email", formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API}/api/send-email`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
